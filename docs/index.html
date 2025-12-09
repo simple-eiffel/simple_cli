@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>simple_cli - Simple CLI Library</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --border: #e5e7eb;
+            --code-bg: #f3f4f6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        h1 { color: var(--primary); margin-bottom: 0.5rem; }
+        h2 { margin-top: 2rem; margin-bottom: 1rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
+        h3 { margin-top: 1.5rem; margin-bottom: 0.5rem; }
+        p { margin-bottom: 1rem; }
+        code {
+            background: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background: var(--code-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+        pre code { background: none; padding: 0; }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+        }
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        .badge-green { background: #d1fae5; color: #065f46; }
+        ul { margin-bottom: 1rem; padding-left: 2rem; }
+        li { margin-bottom: 0.5rem; }
+        a { color: var(--primary); }
+        a:hover { color: var(--primary-dark); }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { font-weight: 600; }
+    </style>
+</head>
+<body>
+    <h1>simple_cli</h1>
+    <p><span class="badge badge-blue">Foundation Layer</span><span class="badge badge-green">Void-Safe</span></p>
+    <p>Easy command-line argument parsing for Eiffel applications.</p>
+
+    <h2>Features</h2>
+    <ul>
+        <li>Simple, fluent API for defining CLI options</li>
+        <li>Support for flags (boolean switches)</li>
+        <li>Support for options with values</li>
+        <li>Short and long name formats (-v, --verbose)</li>
+        <li>Automatic help text generation</li>
+        <li>Command-based parsing (git-style subcommands)</li>
+        <li>Positional argument access</li>
+    </ul>
+
+    <h2>Installation</h2>
+    <p>Add to your ECF file:</p>
+    <pre><code>&lt;library name="simple_cli" location="$SIMPLE_CLI\simple_cli.ecf"/&gt;</code></pre>
+
+    <h2>Quick Start</h2>
+    <pre><code>class MY_APP
+inherit
+    ANY
+
+create
+    make
+
+feature
+    make
+        local
+            cli: SIMPLE_CLI
+        do
+            create cli.make
+            cli.set_app_info ("myapp", "My Application", "1.0.0")
+
+            -- Define flags and options
+            cli.add_flag ("v|verbose", "Enable verbose output")
+            cli.add_flag ("h|help", "Show help")
+            cli.add_option ("o|output", "Output file", "FILE")
+            cli.add_option ("c|config", "Config file", "PATH")
+
+            -- Parse command line
+            cli.parse
+
+            -- Check for help flag
+            if cli.has_flag ("help") then
+                cli.print_help
+            elseif cli.has_errors then
+                cli.print_errors
+            else
+                -- Use parsed values
+                if cli.has_flag ("verbose") then
+                    print ("Verbose mode enabled%N")
+                end
+
+                if attached cli.option_value ("output") as l_file then
+                    print ("Output: " + l_file + "%N")
+                end
+
+                -- Get command (first positional arg)
+                if attached cli.command as l_cmd then
+                    print ("Command: " + l_cmd + "%N")
+                end
+            end
+        end
+end</code></pre>
+
+    <h2>API Reference</h2>
+
+    <h3>Configuration</h3>
+    <table>
+        <tr><th>Feature</th><th>Description</th></tr>
+        <tr><td><code>set_app_info (name, desc, version)</code></td><td>Set application info for help output</td></tr>
+        <tr><td><code>add_flag (names, description)</code></td><td>Add a boolean flag</td></tr>
+        <tr><td><code>add_option (names, description, arg_name)</code></td><td>Add an option with a value</td></tr>
+    </table>
+
+    <h3>Parsing</h3>
+    <table>
+        <tr><th>Feature</th><th>Description</th></tr>
+        <tr><td><code>parse</code></td><td>Parse command-line arguments</td></tr>
+        <tr><td><code>has_parsed: BOOLEAN</code></td><td>Has parse been called?</td></tr>
+        <tr><td><code>is_successful: BOOLEAN</code></td><td>Did parsing succeed?</td></tr>
+    </table>
+
+    <h3>Access</h3>
+    <table>
+        <tr><th>Feature</th><th>Description</th></tr>
+        <tr><td><code>has_flag (name): BOOLEAN</code></td><td>Is the flag set?</td></tr>
+        <tr><td><code>option_value (name): detachable STRING</code></td><td>Get option value</td></tr>
+        <tr><td><code>has_option (name): BOOLEAN</code></td><td>Is the option set?</td></tr>
+        <tr><td><code>command: detachable STRING</code></td><td>First positional argument</td></tr>
+        <tr><td><code>arguments: LIST</code></td><td>All positional arguments</td></tr>
+        <tr><td><code>arguments_after_command: LIST</code></td><td>Arguments after command</td></tr>
+    </table>
+
+    <h3>Help</h3>
+    <table>
+        <tr><th>Feature</th><th>Description</th></tr>
+        <tr><td><code>help_text: STRING</code></td><td>Generate help text</td></tr>
+        <tr><td><code>print_help</code></td><td>Print help to stdout</td></tr>
+        <tr><td><code>print_errors</code></td><td>Print any errors</td></tr>
+    </table>
+
+    <h2>Name Formats</h2>
+    <p>Flags and options support short and long names using the pipe separator:</p>
+    <pre><code>-- Short and long: -v or --verbose
+cli.add_flag ("v|verbose", "Enable verbose output")
+
+-- Long only: --debug
+cli.add_flag ("debug", "Enable debug mode")
+
+-- Short and long option: -o FILE or --output=FILE
+cli.add_option ("o|output", "Output file", "FILE")</code></pre>
+
+    <h2>Command-Line Formats</h2>
+    <pre><code># Flags
+myapp --verbose
+myapp -v
+
+# Options with values
+myapp --output=file.txt
+myapp --output file.txt
+myapp -o file.txt
+myapp -ofile.txt
+
+# Combined short flags
+myapp -vd  # Same as -v -d
+
+# Commands and arguments
+myapp install package1 package2
+myapp build --output=dist</code></pre>
+
+    <h2>Dependencies</h2>
+    <ul>
+        <li><code>base</code> - EiffelStudio base library</li>
+    </ul>
+
+    <h2>Links</h2>
+    <ul>
+        <li><a href="https://github.com/simple-eiffel/simple_cli">GitHub Repository</a></li>
+        <li><a href="https://simple-eiffel.github.io">Simple Eiffel Ecosystem</a></li>
+    </ul>
+
+    <footer style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--text-light); font-size: 0.875rem;">
+        <p>Part of the <a href="https://simple-eiffel.github.io">simple_* ecosystem</a> | MIT License</p>
+    </footer>
+</body>
+</html>
