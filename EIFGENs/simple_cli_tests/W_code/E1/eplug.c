@@ -123,7 +123,7 @@ void egc_init_plug (void)
 	egc_system_name = "simple_cli";
 	egc_system_location = "D:\\prod\\simple_cli\\EIFGENs\\simple_cli_tests\\W_code";
 	egc_compiler_tag = 39;
-	egc_project_version = 1765234183;
+	egc_project_version = 1765243966;
 	egc_has_old_special_semantic = 0;
 	scount = 988;
 
