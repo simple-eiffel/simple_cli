@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="generator" content="ISE EiffelStudio version 25.02.9.8732 - win64">
+<meta name="description" content="Simple CLI argument parsing library"/>
+<meta name="author" content="Larry Rix"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="copyright" content="Copyright (c) 2024-2025, Larry Rix"/>
+<meta name="license" content="MIT License"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+<title>simple_cli Chart</title>
+<link rel="stylesheet" href="../default.css" type="text/css">
+<script type="text/javascript" src="../goto.html"></script>
+</head>
+<body>
+<pre></pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<span class="nav class selected">Chart</span>
+<a class="nav class" href="simple_cli_links.html">Relations</a>
+<a class="nav class" href="simple_cli_short.html">Contracts</a>
+<span class="nav class goto">Go to: <input name="c" value="simple_cli"></span>
+</div></form><pre><span class="ekeyword">class</span>
+	<a class="eclass" href="../src/simple_cli_chart.html">SIMPLE_CLI</a>
+
+<span class="ekeyword">General</span>
+	<span class="eitag">cluster</span><span class="esymbol">:</span> <a class="ecluster" href="../src/index.html">src</a>
+	<span class="eitag">description</span><span class="esymbol">:</span> <span class="estring">&quot;Simple CLI argument parsing library&quot;</span>
+	<span class="eitag">create</span><span class="esymbol">:</span> <a class="efeature" href="../src/simple_cli_short.html#f_make">make</a>
+
+<span class="ekeyword">Ancestors</span>
+	<a class="eclass" href="../base/arguments_32_chart.html">ARGUMENTS_32</a>
+
+<span class="ekeyword">Queries</span>
+	<span title="`argument' was declared in ARGUMENTS_32"><a class="efeature" href="../base/arguments_32_short.html#f_argument">argument</a> <span class="esymbol">(</span><span class="elocal">i</span><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/immutable_string_32_chart.html">IMMUTABLE_STRING_32</a></span>
+	<span title="`argument_array' was declared in ARGUMENTS_32"><a class="efeature" href="../base/arguments_32_short.html#f_argument_array">argument_array</a><span class="esymbol">:</span> <a class="eclass" href="../base/array_chart.html">ARRAY</a> <span class="esymbol">[</span><a class="eclass" href="../base/immutable_string_32_chart.html">IMMUTABLE_STRING_32</a><span class="esymbol">]</span></span>
+	<span title="`argument_count' was declared in ARGUMENTS_32"><a class="efeature" href="../base/arguments_32_short.html#f_argument_count">argument_count</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+	<span title="`arguments' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_arguments">arguments</a><span class="esymbol">:</span> <a class="eclass" href="../base/list_chart.html">LIST</a> <span class="esymbol">[</span><a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">]</span></span>
+	<span title="`arguments_after_command' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_arguments_after_command">arguments_after_command</a><span class="esymbol">:</span> <a class="eclass" href="../base/list_chart.html">LIST</a> <span class="esymbol">[</span><a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">]</span></span>
+	<span title="`boolean_option' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_boolean_option">boolean_option</a> <span class="esymbol">(</span><span class="elocal">a_name</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`coalesced_character_option_value' was declared in ARGUMENTS_32"><a class="efeature" href="../base/arguments_32_short.html#f_coalesced_character_option_value">coalesced_character_option_value</a> <span class="esymbol">(</span><span class="elocal">o</span><span class="esymbol">:</span> <a class="eclass" href="../base/character_32_chart.html">CHARACTER_32</a><span class="esymbol">)</span><span class="esymbol">:</span> <span class="ekeyword">detachable</span> <a class="eclass" href="../base/immutable_string_32_chart.html">IMMUTABLE_STRING_32</a></span>
+	<span title="`coalesced_word_option_value' was declared in ARGUMENTS_32"><a class="efeature" href="../base/arguments_32_short.html#f_coalesced_word_option_value">coalesced_word_option_value</a> <span class="esymbol">(</span><span class="elocal">opt</span><span class="esymbol">:</span> <a class="eclass" href="../base/readable_string_general_chart.html">READABLE_STRING_GENERAL</a><span class="esymbol">)</span><span class="esymbol">:</span> <span class="ekeyword">detachable</span> <a class="eclass" href="../base/immutable_string_32_chart.html">IMMUTABLE_STRING_32</a></span>
+	<span title="`command' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_command">command</a><span class="esymbol">:</span> <span class="ekeyword">detachable</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`command_line' was declared in ARGUMENTS_32"><a class="efeature" href="../base/arguments_32_short.html#f_command_line">Command_line</a><span class="esymbol">:</span> <a class="eclass" href="../base/immutable_string_32_chart.html">IMMUTABLE_STRING_32</a></span>
+	<span title="`command_name' was declared in ARGUMENTS_32"><a class="efeature" href="../base/arguments_32_short.html#f_command_name">Command_name</a><span class="esymbol">:</span> <a class="eclass" href="../base/immutable_string_32_chart.html">IMMUTABLE_STRING_32</a></span>
+	<span title="`errors' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_errors">errors</a><span class="esymbol">:</span> <a class="eclass" href="../base/list_chart.html">LIST</a> <span class="esymbol">[</span><a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">]</span></span>
+	<span title="`has_errors' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_has_errors">has_errors</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`has_flag' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_has_flag">has_flag</a> <span class="esymbol">(</span><span class="elocal">a_name</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`has_option' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_has_option">has_option</a> <span class="esymbol">(</span><span class="elocal">a_name</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`has_parsed' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_has_parsed">has_parsed</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`help_requested' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_help_requested">help_requested</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`help_text' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_help_text">help_text</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`index_of_beginning_with_word_option' was declared in ARGUMENTS_32"><a class="efeature" href="../base/arguments_32_short.html#f_index_of_beginning_with_word_option">index_of_beginning_with_word_option</a> <span class="esymbol">(</span><span class="elocal">opt</span><span class="esymbol">:</span> <a class="eclass" href="../base/readable_string_general_chart.html">READABLE_STRING_GENERAL</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+	<span title="`index_of_character_option' was declared in ARGUMENTS_32"><a class="efeature" href="../base/arguments_32_short.html#f_index_of_character_option">index_of_character_option</a> <span class="esymbol">(</span><span class="elocal">o</span><span class="esymbol">:</span> <a class="eclass" href="../base/character_32_chart.html">CHARACTER_32</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+	<span title="`index_of_word_option' was declared in ARGUMENTS_32"><a class="efeature" href="../base/arguments_32_short.html#f_index_of_word_option">index_of_word_option</a> <span class="esymbol">(</span><span class="elocal">opt</span><span class="esymbol">:</span> <a class="eclass" href="../base/readable_string_general_chart.html">READABLE_STRING_GENERAL</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+	<span title="`integer_option' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_integer_option">integer_option</a> <span class="esymbol">(</span><span class="elocal">a_name</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+	<span title="`integer_option_or_default' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_integer_option_or_default">integer_option_or_default</a> <span class="esymbol">(</span><span class="elocal">a_name</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">;</span> <span class="elocal">a_default</span><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+	<span title="`is_successful' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_is_successful">is_successful</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`new_cursor' was declared in ARGUMENTS_32"><a class="efeature" href="../base/arguments_32_short.html#f_new_cursor">new_cursor</a><span class="esymbol">:</span> <a class="eclass" href="../base/iteration_cursor_chart.html">ITERATION_CURSOR</a> <span class="esymbol">[</span><a class="eclass" href="../base/immutable_string_32_chart.html">IMMUTABLE_STRING_32</a><span class="esymbol">]</span></span>
+	<span title="`option_sign' was declared in ARGUMENTS_32"><a class="efeature" href="../base/arguments_32_short.html#f_option_sign">Option_sign</a><span class="esymbol">:</span> <a class="eclass" href="../base/cell_chart.html">CELL</a> <span class="esymbol">[</span><a class="eclass" href="../base/character_32_chart.html">CHARACTER_32</a><span class="esymbol">]</span></span>
+	<span title="`option_value' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_option_value">option_value</a> <span class="esymbol">(</span><span class="elocal">a_name</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <span class="ekeyword">detachable</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`option_value_or_default' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_option_value_or_default">option_value_or_default</a> <span class="esymbol">(</span><span class="elocal">a_name</span><span class="esymbol">,</span> <span class="elocal">a_default</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`separate_character_option_value' was declared in ARGUMENTS_32"><a class="efeature" href="../base/arguments_32_short.html#f_separate_character_option_value">separate_character_option_value</a> <span class="esymbol">(</span><span class="elocal">o</span><span class="esymbol">:</span> <a class="eclass" href="../base/character_32_chart.html">CHARACTER_32</a><span class="esymbol">)</span><span class="esymbol">:</span> <span class="ekeyword">detachable</span> <a class="eclass" href="../base/immutable_string_32_chart.html">IMMUTABLE_STRING_32</a></span>
+	<span title="`separate_word_option_value' was declared in ARGUMENTS_32"><a class="efeature" href="../base/arguments_32_short.html#f_separate_word_option_value">separate_word_option_value</a> <span class="esymbol">(</span><span class="elocal">opt</span><span class="esymbol">:</span> <a class="eclass" href="../base/readable_string_general_chart.html">READABLE_STRING_GENERAL</a><span class="esymbol">)</span><span class="esymbol">:</span> <span class="ekeyword">detachable</span> <a class="eclass" href="../base/immutable_string_32_chart.html">IMMUTABLE_STRING_32</a></span>
+	<span title="`version_requested' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_version_requested">version_requested</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`version_text' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_version_text">version_text</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+
+<span class="ekeyword">Commands</span>
+	<span title="`add_flag' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_add_flag">add_flag</a> <span class="esymbol">(</span><span class="elocal">a_names</span><span class="esymbol">,</span> <span class="elocal">a_description</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span></span>
+	<span title="`add_option' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_add_option">add_option</a> <span class="esymbol">(</span><span class="elocal">a_names</span><span class="esymbol">,</span> <span class="elocal">a_description</span><span class="esymbol">,</span> <span class="elocal">a_arg_name</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span></span>
+	<span title="`add_option_with_default' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_add_option_with_default">add_option_with_default</a> <span class="esymbol">(</span><span class="elocal">a_names</span><span class="esymbol">,</span> <span class="elocal">a_description</span><span class="esymbol">,</span> <span class="elocal">a_arg_name</span><span class="esymbol">,</span> <span class="elocal">a_default</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span></span>
+	<span title="`add_required_option' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_add_required_option">add_required_option</a> <span class="esymbol">(</span><span class="elocal">a_names</span><span class="esymbol">,</span> <span class="elocal">a_description</span><span class="esymbol">,</span> <span class="elocal">a_arg_name</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span></span>
+	<span title="`disable_help_flag' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_disable_help_flag">disable_help_flag</a></span>
+	<span title="`disable_version_flag' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_disable_version_flag">disable_version_flag</a></span>
+	<span title="`parse' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_parse">parse</a></span>
+	<span title="`print_errors' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_print_errors">print_errors</a></span>
+	<span title="`print_help' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_print_help">print_help</a></span>
+	<span title="`print_version' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_print_version">print_version</a></span>
+	<span title="`set_app_info' is declared in `Current'"><a class="efeature" href="../src/simple_cli_short.html#f_set_app_info">set_app_info</a> <span class="esymbol">(</span><span class="elocal">a_name</span><span class="esymbol">,</span> <span class="elocal">a_description</span><span class="esymbol">,</span> <span class="elocal">a_version</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span></span>
+	<span title="`set_option_sign' was declared in ARGUMENTS_32"><a class="efeature" href="../base/arguments_32_short.html#f_set_option_sign">set_option_sign</a> <span class="esymbol">(</span><span class="elocal">c</span><span class="esymbol">:</span> <a class="eclass" href="../base/character_32_chart.html">CHARACTER_32</a><span class="esymbol">)</span></span>
+
+</pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<span class="nav class selected">Chart</span>
+<a class="nav class" href="simple_cli_links.html">Relations</a>
+<a class="nav class" href="simple_cli_short.html">Contracts</a>
+<span class="nav class goto">Go to: <input name="c" value="simple_cli"></span>
+</div></form><pre></pre>
+<p style="text-align:center;">Generated by <a href="http://www.eiffel.com">ISE EiffelStudio</a></p>
+</body>
+</html>
