@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture - simple_cli</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="images/logo.png">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="images/logo.png" alt="simple_* logo" class="logo">
+        </div>
+        <h1>simple_cli</h1>
+        <p class="tagline">Architecture</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="api-reference.html">API Reference</a></li>
+            <li><a href="architecture.html" class="active">Architecture</a></li>
+            <li><a href="cookbook.html">Cookbook</a></li>
+            <li><a href="https://github.com/simple-eiffel/simple_cli">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="overview">
+            <h2>Architecture Overview</h2>
+            <p>simple_cli is a single-class library that provides fluent argument parsing. It inherits from ARGUMENTS_32 for access to command-line arguments and provides a declarative API for defining options.</p>
+
+            <div class="architecture-diagram">
+<pre>
++------------------+
+|   SIMPLE_CLI     |
++------------------+
+| inherits         |
+| ARGUMENTS_32     |
++------------------+
+        |
++------------------+-------------------+-------------------+
+|    Definition    |     Parsing       |     Access        |
++------------------+-------------------+-------------------+
+| set_app_info()   | parse()           | has_flag()        |
+| add_flag()       | handle_long_arg() | option_value()    |
+| add_option()     | handle_short_arg()| integer_option()  |
+| add_required()   | validate()        | arguments()       |
++------------------+-------------------+-------------------+
+                            |
+                            v
+                   +------------------+
+                   |  Internal State  |
+                   +------------------+
+                   | flag_values      |
+                   | option_values    |
+                   | arguments_list   |
+                   | errors_list      |
+                   +------------------+
+</pre>
+            </div>
+        </section>
+
+        <section id="phases">
+            <h2>Processing Phases</h2>
+
+            <h3>Phase 1: Definition</h3>
+            <p>The application defines flags and options before parsing:</p>
+
+<pre><code>cli.set_app_info (<span class="string">"myapp"</span>, <span class="string">"Description"</span>, <span class="string">"1.0"</span>)
+cli.add_flag (<span class="string">"v|verbose"</span>, <span class="string">"Enable verbose output"</span>)
+cli.add_option (<span class="string">"o|output"</span>, <span class="string">"Output file"</span>, <span class="string">"FILE"</span>)</code></pre>
+
+            <p>During definition, the library builds internal mappings:</p>
+            <ul>
+                <li><code>flag_descriptions</code>: Long name -> description</li>
+                <li><code>flag_short_to_long</code>: Short name -> long name</li>
+                <li><code>option_descriptions</code>: Long name -> description</li>
+                <li><code>option_short_to_long</code>: Short name -> long name</li>
+                <li><code>option_defaults</code>: Long name -> default value</li>
+                <li><code>required_options</code>: Long name -> True</li>
+            </ul>
+
+            <h3>Phase 2: Parsing</h3>
+            <p>The <code>parse</code> feature processes command-line arguments:</p>
+
+<pre><code>parse
+    <span class="keyword">local</span>
+        i: INTEGER
+        l_arg: STRING_32
+    <span class="keyword">do</span>
+        <span class="keyword">from</span> i := 1
+        <span class="keyword">until</span> i > argument_count
+        <span class="keyword">loop</span>
+            l_arg := argument (i)
+
+            <span class="keyword">if</span> l_arg.starts_with (<span class="string">"--"</span>) <span class="keyword">then</span>
+                i := handle_long_argument (l_arg, i)
+            <span class="keyword">elseif</span> l_arg.starts_with (<span class="string">"-"</span>) <span class="keyword">then</span>
+                i := handle_short_argument (l_arg, i)
+            <span class="keyword">else</span>
+                arguments_list.extend (l_arg)
+            <span class="keyword">end</span>
+
+            i := i + 1
+        <span class="keyword">end</span>
+
+        validate_required_options
+    <span class="keyword">end</span></code></pre>
+
+            <h3>Phase 3: Access</h3>
+            <p>After parsing, the application queries results:</p>
+
+<pre><code><span class="keyword">if</span> cli.has_flag (<span class="string">"verbose"</span>) <span class="keyword">then</span> ... <span class="keyword">end</span>
+<span class="keyword">if</span> <span class="keyword">attached</span> cli.option_value (<span class="string">"output"</span>) <span class="keyword">as</span> f <span class="keyword">then</span> ... <span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="argument-handling">
+            <h2>Argument Handling</h2>
+
+            <h3>Long Arguments (--name)</h3>
+<pre><code>handle_long_argument (a_arg: STRING_32; a_index: INTEGER): INTEGER
+    <span class="keyword">local</span>
+        l_name, l_value: STRING
+        l_eq_pos: INTEGER
+    <span class="keyword">do</span>
+        Result := a_index
+        l_eq_pos := a_arg.index_of ('=', 1)
+
+        <span class="keyword">if</span> l_eq_pos > 0 <span class="keyword">then</span>
+            <span class="comment">-- Format: --name=value</span>
+            l_name := a_arg.substring (3, l_eq_pos - 1).as_lower
+            l_value := a_arg.substring (l_eq_pos + 1, a_arg.count)
+            option_values.force (l_value, l_name)
+        <span class="keyword">else</span>
+            <span class="comment">-- Format: --name or --name value</span>
+            l_name := a_arg.substring (3, a_arg.count).as_lower
+
+            <span class="keyword">if</span> is_flag (l_name) <span class="keyword">then</span>
+                flag_values.force (True, l_name)
+            <span class="keyword">elseif</span> is_option (l_name) <span class="keyword">then</span>
+                <span class="comment">-- Next argument is the value</span>
+                l_value := argument (a_index + 1)
+                option_values.force (l_value, l_name)
+                Result := a_index + 1
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span></code></pre>
+
+            <h3>Short Arguments (-x)</h3>
+<pre><code>handle_short_argument (a_arg: STRING_32; a_index: INTEGER): INTEGER
+    <span class="comment">-- Handle -v, -vd (combined), -ofile (attached value)</span>
+    <span class="keyword">local</span>
+        i: INTEGER
+        l_char: CHARACTER_32
+        l_short: STRING
+    <span class="keyword">do</span>
+        Result := a_index
+
+        <span class="comment">-- Iterate through each character after the dash</span>
+        <span class="keyword">from</span> i := 2
+        <span class="keyword">until</span> i > a_arg.count
+        <span class="keyword">loop</span>
+            l_char := a_arg.item (i)
+            l_short := l_char.out.as_lower
+
+            <span class="keyword">if</span> is_short_flag (l_short) <span class="keyword">then</span>
+                <span class="comment">-- Set the flag</span>
+                flag_values.force (True, long_for_short_flag (l_short))
+            <span class="keyword">elseif</span> is_short_option (l_short) <span class="keyword">then</span>
+                <span class="keyword">if</span> i < a_arg.count <span class="keyword">then</span>
+                    <span class="comment">-- Value is attached: -ofile.txt</span>
+                    l_value := a_arg.substring (i + 1, a_arg.count)
+                    i := a_arg.count  <span class="comment">-- Exit loop</span>
+                <span class="keyword">else</span>
+                    <span class="comment">-- Value is next argument: -o file.txt</span>
+                    l_value := argument (a_index + 1)
+                    Result := a_index + 1
+                <span class="keyword">end</span>
+                option_values.force (l_value, long_for_short_option (l_short))
+            <span class="keyword">end</span>
+
+            i := i + 1
+        <span class="keyword">end</span>
+    <span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="data-structures">
+            <h2>Internal Data Structures</h2>
+
+            <h3>Definition Storage</h3>
+            <table class="api-table">
+                <tr>
+                    <th>Attribute</th>
+                    <th>Type</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td><code>flag_descriptions</code></td>
+                    <td>HASH_TABLE [STRING, STRING]</td>
+                    <td>Long name -> description</td>
+                </tr>
+                <tr>
+                    <td><code>flag_short_to_long</code></td>
+                    <td>HASH_TABLE [STRING, STRING]</td>
+                    <td>Short name -> long name</td>
+                </tr>
+                <tr>
+                    <td><code>option_descriptions</code></td>
+                    <td>HASH_TABLE [STRING, STRING]</td>
+                    <td>Long name -> description</td>
+                </tr>
+                <tr>
+                    <td><code>option_short_to_long</code></td>
+                    <td>HASH_TABLE [STRING, STRING]</td>
+                    <td>Short name -> long name</td>
+                </tr>
+                <tr>
+                    <td><code>option_arg_names</code></td>
+                    <td>HASH_TABLE [STRING, STRING]</td>
+                    <td>Long name -> placeholder (FILE, PATH)</td>
+                </tr>
+                <tr>
+                    <td><code>option_defaults</code></td>
+                    <td>HASH_TABLE [STRING, STRING]</td>
+                    <td>Long name -> default value</td>
+                </tr>
+                <tr>
+                    <td><code>required_options</code></td>
+                    <td>HASH_TABLE [BOOLEAN, STRING]</td>
+                    <td>Long name -> True</td>
+                </tr>
+            </table>
+
+            <h3>Parse Results</h3>
+            <table class="api-table">
+                <tr>
+                    <th>Attribute</th>
+                    <th>Type</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td><code>flag_values</code></td>
+                    <td>HASH_TABLE [BOOLEAN, STRING]</td>
+                    <td>Long name -> True (if set)</td>
+                </tr>
+                <tr>
+                    <td><code>option_values</code></td>
+                    <td>HASH_TABLE [STRING, STRING]</td>
+                    <td>Long name -> value</td>
+                </tr>
+                <tr>
+                    <td><code>arguments_list</code></td>
+                    <td>ARRAYED_LIST [STRING]</td>
+                    <td>Positional arguments</td>
+                </tr>
+                <tr>
+                    <td><code>errors_list</code></td>
+                    <td>ARRAYED_LIST [STRING]</td>
+                    <td>Error messages</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="name-resolution">
+            <h2>Name Resolution</h2>
+
+            <p>All names are stored in lowercase for case-insensitive matching:</p>
+
+<pre><code><span class="comment">-- When adding a flag</span>
+add_flag (a_names, a_description: STRING)
+    <span class="keyword">local</span>
+        l_parts: LIST [STRING]
+        l_short, l_long: STRING
+    <span class="keyword">do</span>
+        l_parts := a_names.split ('|')
+        <span class="keyword">if</span> l_parts.count >= 2 <span class="keyword">then</span>
+            l_short := l_parts.first
+            l_long := l_parts.i_th (2)
+            <span class="comment">-- Store mapping: short -> long (both lowercase)</span>
+            flag_short_to_long.force (l_long.as_lower, l_short.as_lower)
+        <span class="keyword">else</span>
+            l_long := a_names
+        <span class="keyword">end</span>
+        <span class="comment">-- Store description with lowercase key</span>
+        flag_descriptions.force (a_description, l_long.as_lower)
+    <span class="keyword">end</span></code></pre>
+
+            <h3>Lookup Chain</h3>
+            <p>When checking <code>has_flag("v")</code>:</p>
+            <ol>
+                <li>Convert to lowercase: "v"</li>
+                <li>Check <code>flag_values.has("v")</code> - direct match?</li>
+                <li>If not, check <code>flag_short_to_long.item("v")</code> - get long name</li>
+                <li>Check <code>flag_values.has(long_name)</code></li>
+            </ol>
+        </section>
+
+        <section id="help-generation">
+            <h2>Help Text Generation</h2>
+
+            <p>The <code>help_text</code> feature generates formatted help output:</p>
+
+<pre><code>help_text: STRING
+    <span class="keyword">do</span>
+        <span class="keyword">create</span> Result.make (500)
+
+        <span class="comment">-- Header</span>
+        Result.append (app_name + <span class="string">" v"</span> + app_version + <span class="string">"%N"</span>)
+        Result.append (app_description + <span class="string">"%N"</span>)
+
+        <span class="comment">-- Usage line</span>
+        Result.append (<span class="string">"%NUsage: "</span> + app_name + <span class="string">" [OPTIONS] [COMMAND] [ARGS...]%N"</span>)
+
+        <span class="comment">-- Options section</span>
+        Result.append (<span class="string">"%NOptions:%N"</span>)
+
+        <span class="comment">-- Built-in flags</span>
+        Result.append (<span class="string">"  -h, --help%TShow this help message%N"</span>)
+        Result.append (<span class="string">"  -V, --version%TShow version information%N"</span>)
+
+        <span class="comment">-- User-defined flags</span>
+        <span class="keyword">across</span> all_flag_names <span class="keyword">as</span> name <span class="keyword">loop</span>
+            format_flag (name, Result)
+        <span class="keyword">end</span>
+
+        <span class="comment">-- User-defined options</span>
+        <span class="keyword">across</span> all_option_names <span class="keyword">as</span> name <span class="keyword">loop</span>
+            format_option (name, Result)
+        <span class="keyword">end</span>
+    <span class="keyword">end</span></code></pre>
+
+            <h3>Output Format</h3>
+<pre><code>myapp v1.0.0
+My application description
+
+Usage: myapp [OPTIONS] [COMMAND] [ARGS...]
+
+Options:
+  -h, --help          Show this help message
+  -V, --version       Show version information
+  -v, --verbose       Enable verbose output
+  -o, --output=FILE   Output file path
+  -f, --format=FMT    Output format (default: json)
+  -i, --input=FILE    Input file [required]</code></pre>
+        </section>
+
+        <section id="validation">
+            <h2>Validation</h2>
+
+            <h3>Required Options</h3>
+<pre><code>validate_required_options
+    <span class="keyword">do</span>
+        <span class="keyword">across</span> required_options <span class="keyword">as</span> req <span class="keyword">loop</span>
+            <span class="keyword">if</span> <span class="keyword">not</span> option_values.has (req.key) <span class="keyword">then</span>
+                <span class="keyword">if</span> <span class="keyword">not</span> option_defaults.has (req.key) <span class="keyword">then</span>
+                    errors_list.extend (<span class="string">"Required option missing: --"</span> + req.key)
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span></code></pre>
+
+            <h3>Unknown Options</h3>
+            <p>Errors are added when an option isn't recognized:</p>
+
+<pre><code><span class="keyword">if</span> <span class="keyword">not</span> flag_descriptions.has (l_name) <span class="keyword">and</span>
+   <span class="keyword">not</span> option_descriptions.has (l_name) <span class="keyword">then</span>
+    errors_list.extend (<span class="string">"Unknown option: --"</span> + l_name)
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="inheritance">
+            <h2>Inheritance from ARGUMENTS_32</h2>
+
+            <p>SIMPLE_CLI inherits from ARGUMENTS_32 to access command-line arguments:</p>
+
+            <table class="api-table">
+                <tr>
+                    <th>Inherited Feature</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td><code>argument_count</code></td>
+                    <td>Number of arguments</td>
+                </tr>
+                <tr>
+                    <td><code>argument (i)</code></td>
+                    <td>Get argument at position i</td>
+                </tr>
+            </table>
+
+            <p>This avoids the need to pass arguments explicitly to the parser.</p>
+        </section>
+
+        <section id="design-decisions">
+            <h2>Design Decisions</h2>
+
+            <h3>Single Class</h3>
+            <p>Unlike complex argument parsers with separate Flag, Option, and Command classes, simple_cli uses a single class. This simplifies usage while still supporting common CLI patterns.</p>
+
+            <h3>Fluent API</h3>
+            <p>Definition methods don't return self, but could be chained via local variable assignment. The linear definition style is clearer for CLI setup.</p>
+
+            <h3>Built-in Help/Version</h3>
+            <p>Most CLI applications need help and version flags. Providing them by default reduces boilerplate while allowing opt-out via <code>disable_help_flag</code>.</p>
+
+            <h3>Case Insensitive</h3>
+            <p>All option/flag names are stored lowercase. This matches user expectations (-V and -v are distinguished only by the uppercase rule for version).</p>
+
+            <h3>Error Collection</h3>
+            <p>Errors are collected rather than raising exceptions. This allows showing all errors at once rather than stopping at the first.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>Part of the <a href="https://github.com/simple-eiffel">simple_*</a> ecosystem of focused, single-purpose Eiffel libraries.</p>
+        <p>&copy; 2025 Larry Rix. MIT License.</p>
+    </footer>
+</body>
+</html>

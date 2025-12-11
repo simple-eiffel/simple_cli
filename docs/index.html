@@ -3,211 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>simple_cli - Simple CLI Library</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --bg: #ffffff;
-            --text: #1f2937;
-            --text-light: #6b7280;
-            --border: #e5e7eb;
-            --code-bg: #f3f4f6;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: var(--text);
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        h1 { color: var(--primary); margin-bottom: 0.5rem; }
-        h2 { margin-top: 2rem; margin-bottom: 1rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
-        h3 { margin-top: 1.5rem; margin-bottom: 0.5rem; }
-        p { margin-bottom: 1rem; }
-        code {
-            background: var(--code-bg);
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.9em;
-        }
-        pre {
-            background: var(--code-bg);
-            padding: 1rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin-bottom: 1rem;
-        }
-        pre code { background: none; padding: 0; }
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-right: 0.5rem;
-        }
-        .badge-blue { background: #dbeafe; color: #1e40af; }
-        .badge-green { background: #d1fae5; color: #065f46; }
-        ul { margin-bottom: 1rem; padding-left: 2rem; }
-        li { margin-bottom: 0.5rem; }
-        a { color: var(--primary); }
-        a:hover { color: var(--primary-dark); }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
-        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
-        th { font-weight: 600; }
-    </style>
+    <title>simple_cli - Documentation</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="images/logo.png">
 </head>
 <body>
-    <h1>simple_cli</h1>
-    <p><span class="badge badge-blue">Foundation Layer</span><span class="badge badge-green">Void-Safe</span></p>
-    <p>Easy command-line argument parsing for Eiffel applications.</p>
+    <header>
+        <div class="logo-container">
+            <img src="images/logo.png" alt="simple_* logo" class="logo">
+        </div>
+        <h1>simple_cli</h1>
+        <p class="tagline">Command-line argument parsing with fluent API</p>
+    </header>
 
-    <h2>Features</h2>
-    <ul>
-        <li>Simple, fluent API for defining CLI options</li>
-        <li>Support for flags (boolean switches)</li>
-        <li>Support for options with values</li>
-        <li>Short and long name formats (-v, --verbose)</li>
-        <li>Automatic help text generation</li>
-        <li>Command-based parsing (git-style subcommands)</li>
-        <li>Positional argument access</li>
-    </ul>
+    <nav>
+        <ul>
+            <li><a href="index.html" class="active">Overview</a></li>
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="api-reference.html">API Reference</a></li>
+            <li><a href="architecture.html">Architecture</a></li>
+            <li><a href="cookbook.html">Cookbook</a></li>
+            <li><a href="https://github.com/simple-eiffel/simple_cli">GitHub</a></li>
+        </ul>
+    </nav>
 
-    <h2>Installation</h2>
-    <p>Add to your ECF file:</p>
-    <pre><code>&lt;library name="simple_cli" location="$SIMPLE_CLI\simple_cli.ecf"/&gt;</code></pre>
+    <main>
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>simple_cli provides a clean, fluent API for parsing command-line arguments in Eiffel applications. It handles flags, options with values, positional arguments, subcommands, and automatic help generation.</p>
 
-    <h2>Quick Start</h2>
-    <pre><code>class MY_APP
-inherit
-    ANY
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Fluent API</h3>
+                    <p>Chain configuration calls for clean, readable option definitions.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Flags & Options</h3>
+                    <p>Boolean flags, string options, defaults, and required options.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Typed Access</h3>
+                    <p>Get values as strings, integers, or booleans with defaults.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Auto Help</h3>
+                    <p>Generates formatted help text from option definitions.</p>
+                </div>
+            </div>
+        </section>
 
-create
-    make
+        <section id="quick-start">
+            <h2>Quick Start</h2>
 
-feature
-    make
-        local
-            cli: SIMPLE_CLI
-        do
-            create cli.make
-            cli.set_app_info ("myapp", "My Application", "1.0.0")
+            <h3>Installation</h3>
+            <ol>
+                <li>Set the environment variable:
+<pre><code>export SIMPLE_CLI=/path/to/simple_cli</code></pre>
+                </li>
+                <li>Add to your ECF file:
+<pre><code>&lt;library name="simple_cli" location="$SIMPLE_CLI/simple_cli.ecf"/&gt;</code></pre>
+                </li>
+            </ol>
 
-            -- Define flags and options
-            cli.add_flag ("v|verbose", "Enable verbose output")
-            cli.add_flag ("h|help", "Show help")
-            cli.add_option ("o|output", "Output file", "FILE")
-            cli.add_option ("c|config", "Config file", "PATH")
+            <h3>Basic Usage</h3>
+<pre><code><span class="keyword">local</span>
+    cli: <span class="type">SIMPLE_CLI</span>
+<span class="keyword">do</span>
+    <span class="keyword">create</span> cli.make
+    cli.set_app_info (<span class="string">"myapp"</span>, <span class="string">"My Application"</span>, <span class="string">"1.0.0"</span>)
 
-            -- Parse command line
-            cli.parse
+    <span class="comment">-- Define options</span>
+    cli.add_flag (<span class="string">"v|verbose"</span>, <span class="string">"Enable verbose output"</span>)
+    cli.add_option (<span class="string">"o|output"</span>, <span class="string">"Output file"</span>, <span class="string">"FILE"</span>)
 
-            -- Check for help flag
-            if cli.has_flag ("help") then
-                cli.print_help
-            elseif cli.has_errors then
-                cli.print_errors
-            else
-                -- Use parsed values
-                if cli.has_flag ("verbose") then
-                    print ("Verbose mode enabled%N")
-                end
+    <span class="comment">-- Parse and use</span>
+    cli.parse
 
-                if attached cli.option_value ("output") as l_file then
-                    print ("Output: " + l_file + "%N")
-                end
+    <span class="keyword">if</span> cli.help_requested <span class="keyword">then</span>
+        cli.print_help
+    <span class="keyword">elseif</span> cli.has_errors <span class="keyword">then</span>
+        cli.print_errors
+    <span class="keyword">else</span>
+        <span class="keyword">if</span> cli.has_flag (<span class="string">"verbose"</span>) <span class="keyword">then</span>
+            print (<span class="string">"Verbose mode%N"</span>)
+        <span class="keyword">end</span>
+        <span class="keyword">if</span> <span class="keyword">attached</span> cli.option_value (<span class="string">"output"</span>) <span class="keyword">as</span> f <span class="keyword">then</span>
+            print (<span class="string">"Output: "</span> + f + <span class="string">"%N"</span>)
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span></code></pre>
+        </section>
 
-                -- Get command (first positional arg)
-                if attached cli.command as l_cmd then
-                    print ("Command: " + l_cmd + "%N")
-                end
-            end
-        end
-end</code></pre>
+        <section id="features">
+            <h2>Key Features</h2>
 
-    <h2>API Reference</h2>
+            <h3>Configuration</h3>
+            <ul>
+                <li><code>set_app_info (name, desc, version)</code> - Application metadata</li>
+                <li><code>add_flag (names, desc)</code> - Boolean switch</li>
+                <li><code>add_option (names, desc, arg)</code> - Option with value</li>
+                <li><code>add_option_with_default (names, desc, arg, default)</code> - With default</li>
+                <li><code>add_required_option (names, desc, arg)</code> - Required option</li>
+            </ul>
 
-    <h3>Configuration</h3>
-    <table>
-        <tr><th>Feature</th><th>Description</th></tr>
-        <tr><td><code>set_app_info (name, desc, version)</code></td><td>Set application info for help output</td></tr>
-        <tr><td><code>add_flag (names, description)</code></td><td>Add a boolean flag</td></tr>
-        <tr><td><code>add_option (names, description, arg_name)</code></td><td>Add an option with a value</td></tr>
-    </table>
+            <h3>Name Formats</h3>
+            <ul>
+                <li><code>"v|verbose"</code> - Short and long: -v or --verbose</li>
+                <li><code>"debug"</code> - Long only: --debug</li>
+                <li><code>"d|dry-run"</code> - Multi-word: -d or --dry-run</li>
+            </ul>
 
-    <h3>Parsing</h3>
-    <table>
-        <tr><th>Feature</th><th>Description</th></tr>
-        <tr><td><code>parse</code></td><td>Parse command-line arguments</td></tr>
-        <tr><td><code>has_parsed: BOOLEAN</code></td><td>Has parse been called?</td></tr>
-        <tr><td><code>is_successful: BOOLEAN</code></td><td>Did parsing succeed?</td></tr>
-    </table>
+            <h3>Command-Line Formats</h3>
+            <ul>
+                <li><code>--verbose</code> - Long flag</li>
+                <li><code>-v</code> - Short flag</li>
+                <li><code>-vdf</code> - Combined short flags</li>
+                <li><code>--output=file.txt</code> - Long option with =</li>
+                <li><code>--output file.txt</code> - Long option with space</li>
+                <li><code>-o file.txt</code> - Short option with space</li>
+                <li><code>-ofile.txt</code> - Short option attached</li>
+            </ul>
 
-    <h3>Access</h3>
-    <table>
-        <tr><th>Feature</th><th>Description</th></tr>
-        <tr><td><code>has_flag (name): BOOLEAN</code></td><td>Is the flag set?</td></tr>
-        <tr><td><code>option_value (name): detachable STRING</code></td><td>Get option value</td></tr>
-        <tr><td><code>has_option (name): BOOLEAN</code></td><td>Is the option set?</td></tr>
-        <tr><td><code>command: detachable STRING</code></td><td>First positional argument</td></tr>
-        <tr><td><code>arguments: LIST</code></td><td>All positional arguments</td></tr>
-        <tr><td><code>arguments_after_command: LIST</code></td><td>Arguments after command</td></tr>
-    </table>
+            <h3>Access</h3>
+            <ul>
+                <li><code>has_flag (name)</code> - Check boolean flag</li>
+                <li><code>option_value (name)</code> - Get string value</li>
+                <li><code>integer_option (name)</code> - Get as integer</li>
+                <li><code>boolean_option (name)</code> - Get as boolean</li>
+                <li><code>command</code> - First positional argument</li>
+                <li><code>arguments</code> - All positional arguments</li>
+            </ul>
 
-    <h3>Help</h3>
-    <table>
-        <tr><th>Feature</th><th>Description</th></tr>
-        <tr><td><code>help_text: STRING</code></td><td>Generate help text</td></tr>
-        <tr><td><code>print_help</code></td><td>Print help to stdout</td></tr>
-        <tr><td><code>print_errors</code></td><td>Print any errors</td></tr>
-    </table>
+            <h3>Help Generation</h3>
+            <ul>
+                <li><code>help_text</code> - Generate help string</li>
+                <li><code>print_help</code> - Print to stdout</li>
+                <li><code>help_requested</code> - Was -h/--help used?</li>
+                <li><code>version_requested</code> - Was -V/--version used?</li>
+            </ul>
+        </section>
 
-    <h2>Name Formats</h2>
-    <p>Flags and options support short and long names using the pipe separator:</p>
-    <pre><code>-- Short and long: -v or --verbose
-cli.add_flag ("v|verbose", "Enable verbose output")
+        <section id="why">
+            <h2>Why simple_cli?</h2>
 
--- Long only: --debug
-cli.add_flag ("debug", "Enable debug mode")
+            <h3>vs. Manual Parsing</h3>
+            <table class="api-table">
+                <tr>
+                    <th>Feature</th>
+                    <th>Manual Parsing</th>
+                    <th>SIMPLE_CLI</th>
+                </tr>
+                <tr>
+                    <td>Setup code</td>
+                    <td>50+ lines</td>
+                    <td>5-10 lines</td>
+                </tr>
+                <tr>
+                    <td>Help generation</td>
+                    <td>Manual</td>
+                    <td>Automatic</td>
+                </tr>
+                <tr>
+                    <td>Error handling</td>
+                    <td>Manual</td>
+                    <td>Built-in</td>
+                </tr>
+                <tr>
+                    <td>Short/long names</td>
+                    <td>Complex</td>
+                    <td>"v|verbose"</td>
+                </tr>
+                <tr>
+                    <td>Typed values</td>
+                    <td>Manual conversion</td>
+                    <td>integer_option, boolean_option</td>
+                </tr>
+                <tr>
+                    <td>Defaults</td>
+                    <td>Manual</td>
+                    <td>add_option_with_default</td>
+                </tr>
+            </table>
+        </section>
 
--- Short and long option: -o FILE or --output=FILE
-cli.add_option ("o|output", "Output file", "FILE")</code></pre>
+        <section id="documentation">
+            <h2>Documentation</h2>
+            <ul>
+                <li><a href="user-guide.html">User Guide</a> - Complete tutorial with examples</li>
+                <li><a href="api-reference.html">API Reference</a> - Full API with contracts</li>
+                <li><a href="architecture.html">Architecture</a> - Internal design and parsing phases</li>
+                <li><a href="cookbook.html">Cookbook</a> - Ready-to-use recipes for common patterns</li>
+            </ul>
+        </section>
 
-    <h2>Command-Line Formats</h2>
-    <pre><code># Flags
-myapp --verbose
-myapp -v
+        <section id="examples">
+            <h2>More Examples</h2>
 
-# Options with values
-myapp --output=file.txt
-myapp --output file.txt
-myapp -o file.txt
-myapp -ofile.txt
+            <h3>Subcommand-Style CLI</h3>
+<pre><code><span class="keyword">local</span>
+    cli: <span class="type">SIMPLE_CLI</span>
+<span class="keyword">do</span>
+    <span class="keyword">create</span> cli.make
+    cli.set_app_info (<span class="string">"pkg"</span>, <span class="string">"Package Manager"</span>, <span class="string">"1.0.0"</span>)
+    cli.add_flag (<span class="string">"v|verbose"</span>, <span class="string">"Verbose output"</span>)
+    cli.parse
 
-# Combined short flags
-myapp -vd  # Same as -v -d
+    <span class="keyword">if</span> <span class="keyword">attached</span> cli.command <span class="keyword">as</span> cmd <span class="keyword">then</span>
+        <span class="keyword">inspect</span> cmd
+        <span class="keyword">when</span> <span class="string">"install"</span> <span class="keyword">then</span>
+            <span class="comment">-- pkg install package1 package2</span>
+            <span class="keyword">across</span> cli.arguments_after_command <span class="keyword">as</span> pkg <span class="keyword">loop</span>
+                install_package (pkg)
+            <span class="keyword">end</span>
+        <span class="keyword">when</span> <span class="string">"remove"</span> <span class="keyword">then</span>
+            <span class="comment">-- pkg remove package1</span>
+            <span class="keyword">if</span> cli.arguments_after_command.count > 0 <span class="keyword">then</span>
+                remove_package (cli.arguments_after_command.first)
+            <span class="keyword">end</span>
+        <span class="keyword">else</span>
+            print (<span class="string">"Unknown command: "</span> + cmd + <span class="string">"%N"</span>)
+        <span class="keyword">end</span>
+    <span class="keyword">else</span>
+        cli.print_help
+    <span class="keyword">end</span>
+<span class="keyword">end</span></code></pre>
 
-# Commands and arguments
-myapp install package1 package2
-myapp build --output=dist</code></pre>
+            <h3>Required Options</h3>
+<pre><code><span class="keyword">local</span>
+    cli: <span class="type">SIMPLE_CLI</span>
+<span class="keyword">do</span>
+    <span class="keyword">create</span> cli.make
+    cli.set_app_info (<span class="string">"convert"</span>, <span class="string">"File Converter"</span>, <span class="string">"1.0.0"</span>)
+    cli.add_required_option (<span class="string">"i|input"</span>, <span class="string">"Input file"</span>, <span class="string">"FILE"</span>)
+    cli.add_required_option (<span class="string">"o|output"</span>, <span class="string">"Output file"</span>, <span class="string">"FILE"</span>)
+    cli.add_option_with_default (<span class="string">"f|format"</span>, <span class="string">"Output format"</span>, <span class="string">"FORMAT"</span>, <span class="string">"json"</span>)
+    cli.parse
 
-    <h2>Dependencies</h2>
-    <ul>
-        <li><code>base</code> - EiffelStudio base library</li>
-    </ul>
+    <span class="keyword">if</span> cli.has_errors <span class="keyword">then</span>
+        cli.print_errors
+        cli.print_help
+    <span class="keyword">else</span>
+        <span class="comment">-- Required options guaranteed to have values</span>
+        <span class="keyword">if</span> <span class="keyword">attached</span> cli.option_value (<span class="string">"input"</span>) <span class="keyword">as</span> inp <span class="keyword">and then</span>
+           <span class="keyword">attached</span> cli.option_value (<span class="string">"output"</span>) <span class="keyword">as</span> out <span class="keyword">then</span>
+            convert_file (inp, out, cli.option_value_or_default (<span class="string">"format"</span>, <span class="string">"json"</span>))
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span></code></pre>
+        </section>
+    </main>
 
-    <h2>Links</h2>
-    <ul>
-        <li><a href="https://github.com/simple-eiffel/simple_cli">GitHub Repository</a></li>
-        <li><a href="https://simple-eiffel.github.io">Simple Eiffel Ecosystem</a></li>
-    </ul>
-
-    <footer style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--text-light); font-size: 0.875rem;">
-        <p>Part of the <a href="https://simple-eiffel.github.io">simple_* ecosystem</a> | MIT License</p>
+    <footer>
+        <p>Part of the <a href="https://github.com/simple-eiffel">simple_*</a> ecosystem of focused, single-purpose Eiffel libraries.</p>
+        <p>&copy; 2025 Larry Rix. MIT License.</p>
     </footer>
 </body>
 </html>

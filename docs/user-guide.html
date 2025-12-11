@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Guide - simple_cli</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="images/logo.png">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="images/logo.png" alt="simple_* logo" class="logo">
+        </div>
+        <h1>simple_cli</h1>
+        <p class="tagline">User Guide</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="user-guide.html" class="active">User Guide</a></li>
+            <li><a href="api-reference.html">API Reference</a></li>
+            <li><a href="architecture.html">Architecture</a></li>
+            <li><a href="cookbook.html">Cookbook</a></li>
+            <li><a href="https://github.com/simple-eiffel/simple_cli">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="getting-started">
+            <h2>Getting Started</h2>
+
+            <h3>Installation</h3>
+            <ol>
+                <li>Set the environment variable:
+<pre><code>export SIMPLE_CLI=/path/to/simple_cli</code></pre>
+                </li>
+                <li>Add to your ECF file:
+<pre><code>&lt;library name="simple_cli" location="$SIMPLE_CLI/simple_cli.ecf"/&gt;</code></pre>
+                </li>
+            </ol>
+
+            <h3>Basic Usage</h3>
+<pre><code><span class="keyword">local</span>
+    cli: <span class="type">SIMPLE_CLI</span>
+<span class="keyword">do</span>
+    <span class="keyword">create</span> cli.make
+    cli.set_app_info (<span class="string">"myapp"</span>, <span class="string">"My Application"</span>, <span class="string">"1.0.0"</span>)
+
+    <span class="comment">-- Define flags and options</span>
+    cli.add_flag (<span class="string">"v|verbose"</span>, <span class="string">"Enable verbose output"</span>)
+    cli.add_option (<span class="string">"o|output"</span>, <span class="string">"Output file"</span>, <span class="string">"FILE"</span>)
+
+    <span class="comment">-- Parse command line</span>
+    cli.parse
+
+    <span class="comment">-- Handle results</span>
+    <span class="keyword">if</span> cli.help_requested <span class="keyword">then</span>
+        cli.print_help
+    <span class="keyword">elseif</span> cli.has_errors <span class="keyword">then</span>
+        cli.print_errors
+    <span class="keyword">else</span>
+        run_application (cli)
+    <span class="keyword">end</span>
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="flags">
+            <h2>Defining Flags</h2>
+
+            <p>Flags are boolean switches that are either present or absent.</p>
+
+            <h3>Short and Long Names</h3>
+<pre><code><span class="comment">-- Short and long names (separated by |)</span>
+cli.add_flag (<span class="string">"v|verbose"</span>, <span class="string">"Enable verbose output"</span>)
+<span class="comment">-- Can be used as: -v or --verbose</span>
+
+<span class="comment">-- Long name only</span>
+cli.add_flag (<span class="string">"debug"</span>, <span class="string">"Enable debug mode"</span>)
+<span class="comment">-- Can be used as: --debug</span></code></pre>
+
+            <h3>Checking Flags</h3>
+<pre><code><span class="keyword">if</span> cli.has_flag (<span class="string">"verbose"</span>) <span class="keyword">then</span>
+    print (<span class="string">"Verbose mode enabled%N"</span>)
+<span class="keyword">end</span>
+
+<span class="comment">-- You can use either the short or long name</span>
+<span class="keyword">if</span> cli.has_flag (<span class="string">"v"</span>) <span class="keyword">then</span>
+    <span class="comment">-- This also works</span>
+<span class="keyword">end</span></code></pre>
+
+            <h3>Built-in Flags</h3>
+            <p>simple_cli provides two built-in flags:</p>
+            <ul>
+                <li><code>-h</code>, <code>--help</code> - Show help text</li>
+                <li><code>-V</code>, <code>--version</code> - Show version</li>
+            </ul>
+
+<pre><code><span class="comment">-- Check for help/version requests</span>
+<span class="keyword">if</span> cli.help_requested <span class="keyword">then</span>
+    cli.print_help
+<span class="keyword">elseif</span> cli.version_requested <span class="keyword">then</span>
+    cli.print_version
+<span class="keyword">end</span>
+
+<span class="comment">-- Disable built-in flags if needed</span>
+cli.disable_help_flag
+cli.disable_version_flag</code></pre>
+        </section>
+
+        <section id="options">
+            <h2>Defining Options</h2>
+
+            <p>Options take a value, like <code>--output=file.txt</code>.</p>
+
+            <h3>Basic Options</h3>
+<pre><code><span class="comment">-- Option with short and long names</span>
+cli.add_option (<span class="string">"o|output"</span>, <span class="string">"Output file path"</span>, <span class="string">"FILE"</span>)
+
+<span class="comment">-- Long name only</span>
+cli.add_option (<span class="string">"config"</span>, <span class="string">"Configuration file"</span>, <span class="string">"PATH"</span>)
+
+<span class="comment">-- The third argument is the placeholder shown in help text</span></code></pre>
+
+            <h3>Options with Defaults</h3>
+<pre><code><span class="comment">-- Option with default value</span>
+cli.add_option_with_default (<span class="string">"f|format"</span>, <span class="string">"Output format"</span>, <span class="string">"FMT"</span>, <span class="string">"json"</span>)
+
+<span class="comment">-- If --format is not specified, returns "json"</span></code></pre>
+
+            <h3>Required Options</h3>
+<pre><code><span class="comment">-- Required option (error if missing)</span>
+cli.add_required_option (<span class="string">"i|input"</span>, <span class="string">"Input file"</span>, <span class="string">"FILE"</span>)
+
+<span class="comment">-- Parsing will fail with an error if not provided</span></code></pre>
+
+            <h3>Getting Option Values</h3>
+<pre><code><span class="comment">-- Get string value (may be Void)</span>
+<span class="keyword">if</span> <span class="keyword">attached</span> cli.option_value (<span class="string">"output"</span>) <span class="keyword">as</span> out_file <span class="keyword">then</span>
+    print (<span class="string">"Output: "</span> + out_file)
+<span class="keyword">end</span>
+
+<span class="comment">-- Get with inline default</span>
+output_path := cli.option_value_or_default (<span class="string">"output"</span>, <span class="string">"output.txt"</span>)
+
+<span class="comment">-- Check if option was provided</span>
+<span class="keyword">if</span> cli.has_option (<span class="string">"output"</span>) <span class="keyword">then</span>
+    <span class="comment">-- Option was set (or has default)</span>
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="typed-options">
+            <h2>Typed Option Values</h2>
+
+            <h3>Integer Options</h3>
+<pre><code>cli.add_option (<span class="string">"n|count"</span>, <span class="string">"Number of items"</span>, <span class="string">"NUM"</span>)
+
+<span class="comment">-- Get as integer</span>
+count := cli.integer_option (<span class="string">"count"</span>)
+
+<span class="comment">-- Get with default</span>
+count := cli.integer_option_or_default (<span class="string">"count"</span>, 10)</code></pre>
+
+            <h3>Boolean Options</h3>
+<pre><code>cli.add_option (<span class="string">"dry-run"</span>, <span class="string">"Dry run mode"</span>, <span class="string">"BOOL"</span>)
+
+<span class="comment">-- Get as boolean</span>
+<span class="comment">-- Recognizes: "true", "false", "yes", "no", "1", "0"</span>
+<span class="keyword">if</span> cli.boolean_option (<span class="string">"dry-run"</span>) <span class="keyword">then</span>
+    print (<span class="string">"Dry run enabled%N"</span>)
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="command-line-formats">
+            <h2>Command-Line Formats</h2>
+
+            <p>simple_cli supports standard Unix-style argument formats:</p>
+
+            <h3>Flags</h3>
+<pre><code># Long form
+myapp --verbose
+
+# Short form
+myapp -v
+
+# Combined short flags
+myapp -vd    # Same as -v -d</code></pre>
+
+            <h3>Options</h3>
+<pre><code># Long with equals
+myapp --output=file.txt
+
+# Long with space
+myapp --output file.txt
+
+# Short with space
+myapp -o file.txt
+
+# Short attached (no space)
+myapp -ofile.txt</code></pre>
+
+            <h3>Mixed Usage</h3>
+<pre><code># Combining flags, options, and arguments
+myapp -v --output=result.txt build src/
+
+# Multiple short flags combined
+myapp -vdf --output=result.txt</code></pre>
+        </section>
+
+        <section id="arguments">
+            <h2>Positional Arguments</h2>
+
+            <p>Arguments that aren't flags or options are positional arguments:</p>
+
+<pre><code><span class="comment">-- Command line: myapp build src/ tests/</span>
+
+<span class="comment">-- Get the command (first positional argument)</span>
+<span class="keyword">if</span> <span class="keyword">attached</span> cli.command <span class="keyword">as</span> cmd <span class="keyword">then</span>
+    print (<span class="string">"Command: "</span> + cmd)  <span class="comment">-- "build"</span>
+<span class="keyword">end</span>
+
+<span class="comment">-- Get all positional arguments</span>
+<span class="keyword">across</span> cli.arguments <span class="keyword">as</span> arg <span class="keyword">loop</span>
+    print (<span class="string">"Arg: "</span> + arg + <span class="string">"%N"</span>)
+<span class="keyword">end</span>
+<span class="comment">-- Prints: "build", "src/", "tests/"</span>
+
+<span class="comment">-- Get arguments after the command</span>
+<span class="keyword">across</span> cli.arguments_after_command <span class="keyword">as</span> arg <span class="keyword">loop</span>
+    print (<span class="string">"Target: "</span> + arg + <span class="string">"%N"</span>)
+<span class="keyword">end</span>
+<span class="comment">-- Prints: "src/", "tests/"</span></code></pre>
+        </section>
+
+        <section id="error-handling">
+            <h2>Error Handling</h2>
+
+<pre><code>cli.parse
+
+<span class="keyword">if</span> cli.has_errors <span class="keyword">then</span>
+    <span class="comment">-- Print built-in error messages</span>
+    cli.print_errors
+
+    <span class="comment">-- Or handle manually</span>
+    <span class="keyword">across</span> cli.errors <span class="keyword">as</span> err <span class="keyword">loop</span>
+        print (<span class="string">"Error: "</span> + err + <span class="string">"%N"</span>)
+    <span class="keyword">end</span>
+<span class="keyword">end</span></code></pre>
+
+            <h3>Common Errors</h3>
+            <ul>
+                <li><code>Unknown option: --foo</code> - Unrecognized option name</li>
+                <li><code>Option --output requires a value</code> - Missing value for option</li>
+                <li><code>Required option missing: --input</code> - Required option not provided</li>
+            </ul>
+
+            <h3>Checking Success</h3>
+<pre><code><span class="comment">-- is_successful is True when:</span>
+<span class="comment">-- - No errors occurred</span>
+<span class="comment">-- - Help was not requested</span>
+<span class="comment">-- - Version was not requested</span>
+
+<span class="keyword">if</span> cli.is_successful <span class="keyword">then</span>
+    run_application (cli)
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="help-text">
+            <h2>Help Text Generation</h2>
+
+            <p>simple_cli automatically generates help text:</p>
+
+<pre><code>cli.set_app_info (<span class="string">"myapp"</span>, <span class="string">"My awesome application"</span>, <span class="string">"2.1.0"</span>)
+cli.add_flag (<span class="string">"v|verbose"</span>, <span class="string">"Enable verbose output"</span>)
+cli.add_flag (<span class="string">"d|debug"</span>, <span class="string">"Enable debug mode"</span>)
+cli.add_option (<span class="string">"o|output"</span>, <span class="string">"Output file"</span>, <span class="string">"FILE"</span>)
+cli.add_option_with_default (<span class="string">"f|format"</span>, <span class="string">"Output format"</span>, <span class="string">"FMT"</span>, <span class="string">"json"</span>)
+cli.add_required_option (<span class="string">"i|input"</span>, <span class="string">"Input file"</span>, <span class="string">"FILE"</span>)
+
+<span class="comment">-- Running: myapp --help</span>
+cli.print_help</code></pre>
+
+            <h3>Generated Output</h3>
+<pre><code>myapp v2.1.0
+My awesome application
+
+Usage: myapp [OPTIONS] [COMMAND] [ARGS...]
+
+Options:
+  -h, --help          Show this help message
+  -V, --version       Show version information
+  -v, --verbose       Enable verbose output
+  -d, --debug         Enable debug mode
+  -o, --output=FILE   Output file
+  -f, --format=FMT    Output format (default: json)
+  -i, --input=FILE    Input file [required]</code></pre>
+        </section>
+
+        <section id="complete-example">
+            <h2>Complete Example</h2>
+
+<pre><code><span class="keyword">class</span> <span class="type">MY_CLI_APP</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span>
+
+    make
+        <span class="keyword">local</span>
+            cli: <span class="type">SIMPLE_CLI</span>
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> cli.make
+            configure_cli (cli)
+            cli.parse
+            handle_result (cli)
+        <span class="keyword">end</span>
+
+<span class="keyword">feature</span> {NONE} <span class="comment">-- Implementation</span>
+
+    configure_cli (cli: <span class="type">SIMPLE_CLI</span>)
+        <span class="keyword">do</span>
+            cli.set_app_info (<span class="string">"compiler"</span>, <span class="string">"Simple compiler tool"</span>, <span class="string">"1.0.0"</span>)
+
+            <span class="comment">-- Flags</span>
+            cli.add_flag (<span class="string">"v|verbose"</span>, <span class="string">"Enable verbose output"</span>)
+            cli.add_flag (<span class="string">"q|quiet"</span>, <span class="string">"Suppress all output"</span>)
+            cli.add_flag (<span class="string">"w|warnings"</span>, <span class="string">"Show warnings"</span>)
+
+            <span class="comment">-- Options</span>
+            cli.add_required_option (<span class="string">"i|input"</span>, <span class="string">"Input source file"</span>, <span class="string">"FILE"</span>)
+            cli.add_option (<span class="string">"o|output"</span>, <span class="string">"Output file"</span>, <span class="string">"FILE"</span>)
+            cli.add_option_with_default (<span class="string">"O|optimize"</span>, <span class="string">"Optimization level"</span>, <span class="string">"LEVEL"</span>, <span class="string">"2"</span>)
+            cli.add_option_with_default (<span class="string">"t|target"</span>, <span class="string">"Target platform"</span>, <span class="string">"PLATFORM"</span>, <span class="string">"native"</span>)
+        <span class="keyword">end</span>
+
+    handle_result (cli: <span class="type">SIMPLE_CLI</span>)
+        <span class="keyword">do</span>
+            <span class="keyword">if</span> cli.help_requested <span class="keyword">then</span>
+                cli.print_help
+            <span class="keyword">elseif</span> cli.version_requested <span class="keyword">then</span>
+                cli.print_version
+            <span class="keyword">elseif</span> cli.has_errors <span class="keyword">then</span>
+                cli.print_errors
+                print (<span class="string">"%NUse --help for usage information%N"</span>)
+            <span class="keyword">else</span>
+                compile (cli)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    compile (cli: <span class="type">SIMPLE_CLI</span>)
+        <span class="keyword">local</span>
+            input_file, output_file: STRING
+            opt_level: INTEGER
+        <span class="keyword">do</span>
+            <span class="comment">-- Get required input</span>
+            <span class="keyword">if</span> <span class="keyword">attached</span> cli.option_value (<span class="string">"input"</span>) <span class="keyword">as</span> f <span class="keyword">then</span>
+                input_file := f
+            <span class="keyword">end</span>
+
+            <span class="comment">-- Get optional output (default to input.out)</span>
+            output_file := cli.option_value_or_default (<span class="string">"output"</span>, input_file + <span class="string">".out"</span>)
+
+            <span class="comment">-- Get optimization level</span>
+            opt_level := cli.integer_option_or_default (<span class="string">"optimize"</span>, 2)
+
+            <span class="comment">-- Check flags</span>
+            <span class="keyword">if</span> cli.has_flag (<span class="string">"verbose"</span>) <span class="keyword">then</span>
+                print (<span class="string">"Compiling "</span> + input_file + <span class="string">" -> "</span> + output_file + <span class="string">"%N"</span>)
+                print (<span class="string">"Optimization: O"</span> + opt_level.out + <span class="string">"%N"</span>)
+                print (<span class="string">"Target: "</span> + cli.option_value_or_default (<span class="string">"target"</span>, <span class="string">"native"</span>) + <span class="string">"%N"</span>)
+            <span class="keyword">end</span>
+
+            <span class="comment">-- Do actual compilation...</span>
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p>Part of the <a href="https://github.com/simple-eiffel">simple_*</a> ecosystem of focused, single-purpose Eiffel libraries.</p>
+        <p>&copy; 2025 Larry Rix. MIT License.</p>
+    </footer>
+</body>
+</html>

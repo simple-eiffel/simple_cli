@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookbook - simple_cli</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="images/logo.png">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="images/logo.png" alt="simple_* logo" class="logo">
+        </div>
+        <h1>simple_cli</h1>
+        <p class="tagline">Cookbook</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="api-reference.html">API Reference</a></li>
+            <li><a href="architecture.html">Architecture</a></li>
+            <li><a href="cookbook.html" class="active">Cookbook</a></li>
+            <li><a href="https://github.com/simple-eiffel/simple_cli">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="toc">
+            <h2>Recipes</h2>
+            <ol>
+                <li><a href="#simple-tool">Simple Command-Line Tool</a></li>
+                <li><a href="#subcommands">Git-Style Subcommands</a></li>
+                <li><a href="#file-processor">File Processor</a></li>
+                <li><a href="#build-tool">Build Tool</a></li>
+                <li><a href="#server-app">Server Application</a></li>
+                <li><a href="#data-converter">Data Converter</a></li>
+                <li><a href="#test-runner">Test Runner</a></li>
+                <li><a href="#deployment">Deployment Tool</a></li>
+            </ol>
+        </section>
+
+        <section id="simple-tool">
+            <h2>1. Simple Command-Line Tool</h2>
+            <p>A basic tool with flags and one required option.</p>
+
+<pre><code><span class="keyword">class</span> <span class="type">GREP_TOOL</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span>
+
+    make
+        <span class="keyword">local</span>
+            cli: <span class="type">SIMPLE_CLI</span>
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> cli.make
+            cli.set_app_info (<span class="string">"mygrep"</span>, <span class="string">"Search for patterns in files"</span>, <span class="string">"1.0.0"</span>)
+
+            <span class="comment">-- Flags</span>
+            cli.add_flag (<span class="string">"i|ignore-case"</span>, <span class="string">"Case-insensitive matching"</span>)
+            cli.add_flag (<span class="string">"n|line-number"</span>, <span class="string">"Print line numbers"</span>)
+            cli.add_flag (<span class="string">"c|count"</span>, <span class="string">"Only print match count"</span>)
+            cli.add_flag (<span class="string">"r|recursive"</span>, <span class="string">"Search directories recursively"</span>)
+
+            cli.parse
+
+            <span class="keyword">if</span> cli.help_requested <span class="keyword">then</span>
+                cli.print_help
+            <span class="keyword">elseif</span> cli.has_errors <span class="keyword">then</span>
+                cli.print_errors
+            <span class="keyword">elseif</span> cli.arguments.count < 2 <span class="keyword">then</span>
+                print (<span class="string">"Usage: mygrep [OPTIONS] PATTERN FILE...%N"</span>)
+            <span class="keyword">else</span>
+                search (cli)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    search (cli: <span class="type">SIMPLE_CLI</span>)
+        <span class="keyword">local</span>
+            pattern: STRING
+            ignore_case: BOOLEAN
+            show_line_nums: BOOLEAN
+        <span class="keyword">do</span>
+            <span class="keyword">if</span> <span class="keyword">attached</span> cli.command <span class="keyword">as</span> p <span class="keyword">then</span>
+                pattern := p
+            <span class="keyword">end</span>
+
+            ignore_case := cli.has_flag (<span class="string">"ignore-case"</span>)
+            show_line_nums := cli.has_flag (<span class="string">"line-number"</span>)
+
+            <span class="comment">-- Search each file argument</span>
+            <span class="keyword">across</span> cli.arguments_after_command <span class="keyword">as</span> file_path <span class="keyword">loop</span>
+                search_file (pattern, file_path, ignore_case, show_line_nums)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    search_file (pattern, file_path: STRING; ignore_case, show_line_nums: BOOLEAN)
+        <span class="keyword">do</span>
+            <span class="comment">-- Implementation...</span>
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+
+            <h3>Usage</h3>
+<pre><code># Basic search
+mygrep "error" log.txt
+
+# Case-insensitive with line numbers
+mygrep -in "warning" src/*.e
+
+# Recursive search
+mygrep -r "TODO" src/</code></pre>
+        </section>
+
+        <section id="subcommands">
+            <h2>2. Git-Style Subcommands</h2>
+            <p>Tool with multiple subcommands like git (init, add, commit).</p>
+
+<pre><code><span class="keyword">class</span> <span class="type">PACKAGE_MANAGER</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span>
+
+    make
+        <span class="keyword">local</span>
+            cli: <span class="type">SIMPLE_CLI</span>
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> cli.make
+            cli.set_app_info (<span class="string">"pkg"</span>, <span class="string">"Simple package manager"</span>, <span class="string">"1.0.0"</span>)
+
+            <span class="comment">-- Global options</span>
+            cli.add_flag (<span class="string">"v|verbose"</span>, <span class="string">"Verbose output"</span>)
+            cli.add_flag (<span class="string">"q|quiet"</span>, <span class="string">"Suppress output"</span>)
+
+            cli.parse
+
+            <span class="keyword">if</span> cli.help_requested <span class="keyword">then</span>
+                print_main_help
+            <span class="keyword">elseif</span> <span class="keyword">attached</span> cli.command <span class="keyword">as</span> cmd <span class="keyword">then</span>
+                dispatch_command (cmd, cli)
+            <span class="keyword">else</span>
+                print_main_help
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+<span class="keyword">feature</span> {NONE} <span class="comment">-- Commands</span>
+
+    dispatch_command (cmd: STRING; cli: <span class="type">SIMPLE_CLI</span>)
+        <span class="keyword">do</span>
+            <span class="keyword">if</span> cmd.same_string (<span class="string">"install"</span>) <span class="keyword">then</span>
+                cmd_install (cli)
+            <span class="keyword">elseif</span> cmd.same_string (<span class="string">"remove"</span>) <span class="keyword">then</span>
+                cmd_remove (cli)
+            <span class="keyword">elseif</span> cmd.same_string (<span class="string">"update"</span>) <span class="keyword">then</span>
+                cmd_update (cli)
+            <span class="keyword">elseif</span> cmd.same_string (<span class="string">"list"</span>) <span class="keyword">then</span>
+                cmd_list (cli)
+            <span class="keyword">else</span>
+                print (<span class="string">"Unknown command: "</span> + cmd + <span class="string">"%N"</span>)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    cmd_install (cli: <span class="type">SIMPLE_CLI</span>)
+        <span class="keyword">do</span>
+            <span class="keyword">across</span> cli.arguments_after_command <span class="keyword">as</span> pkg <span class="keyword">loop</span>
+                <span class="keyword">if</span> cli.has_flag (<span class="string">"verbose"</span>) <span class="keyword">then</span>
+                    print (<span class="string">"Installing "</span> + pkg + <span class="string">"...%N"</span>)
+                <span class="keyword">end</span>
+                <span class="comment">-- Install package...</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    cmd_remove (cli: <span class="type">SIMPLE_CLI</span>)
+        <span class="keyword">do</span>
+            <span class="comment">-- Remove packages...</span>
+        <span class="keyword">end</span>
+
+    cmd_update (cli: <span class="type">SIMPLE_CLI</span>)
+        <span class="keyword">do</span>
+            print (<span class="string">"Updating package index...%N"</span>)
+        <span class="keyword">end</span>
+
+    cmd_list (cli: <span class="type">SIMPLE_CLI</span>)
+        <span class="keyword">do</span>
+            print (<span class="string">"Installed packages:%N"</span>)
+            <span class="comment">-- List packages...</span>
+        <span class="keyword">end</span>
+
+    print_main_help
+        <span class="keyword">do</span>
+            print (<span class="string">"pkg - Simple package manager%N"</span>)
+            print (<span class="string">"%NCommands:%N"</span>)
+            print (<span class="string">"  install PKG...   Install packages%N"</span>)
+            print (<span class="string">"  remove PKG...    Remove packages%N"</span>)
+            print (<span class="string">"  update           Update package index%N"</span>)
+            print (<span class="string">"  list             List installed packages%N"</span>)
+            print (<span class="string">"%NOptions:%N"</span>)
+            print (<span class="string">"  -v, --verbose    Verbose output%N"</span>)
+            print (<span class="string">"  -q, --quiet      Suppress output%N"</span>)
+            print (<span class="string">"  -h, --help       Show help%N"</span>)
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+
+            <h3>Usage</h3>
+<pre><code>pkg install simple_json simple_file
+pkg -v remove old_package
+pkg update
+pkg list</code></pre>
+        </section>
+
+        <section id="file-processor">
+            <h2>3. File Processor</h2>
+            <p>Process files with input/output options.</p>
+
+<pre><code><span class="keyword">class</span> <span class="type">FILE_PROCESSOR</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span>
+
+    make
+        <span class="keyword">local</span>
+            cli: <span class="type">SIMPLE_CLI</span>
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> cli.make
+            cli.set_app_info (<span class="string">"process"</span>, <span class="string">"Transform files"</span>, <span class="string">"1.0.0"</span>)
+
+            <span class="comment">-- Required input</span>
+            cli.add_required_option (<span class="string">"i|input"</span>, <span class="string">"Input file"</span>, <span class="string">"FILE"</span>)
+
+            <span class="comment">-- Optional output (defaults to stdout)</span>
+            cli.add_option (<span class="string">"o|output"</span>, <span class="string">"Output file (default: stdout)"</span>, <span class="string">"FILE"</span>)
+
+            <span class="comment">-- Format options</span>
+            cli.add_option_with_default (<span class="string">"f|format"</span>, <span class="string">"Output format"</span>, <span class="string">"FMT"</span>, <span class="string">"json"</span>)
+
+            <span class="comment">-- Processing flags</span>
+            cli.add_flag (<span class="string">"p|pretty"</span>, <span class="string">"Pretty print output"</span>)
+            cli.add_flag (<span class="string">"m|minify"</span>, <span class="string">"Minify output"</span>)
+
+            cli.parse
+
+            <span class="keyword">if</span> cli.help_requested <span class="keyword">then</span>
+                cli.print_help
+            <span class="keyword">elseif</span> cli.has_errors <span class="keyword">then</span>
+                cli.print_errors
+            <span class="keyword">else</span>
+                process (cli)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    process (cli: <span class="type">SIMPLE_CLI</span>)
+        <span class="keyword">local</span>
+            input_path, output_path: STRING
+            format: STRING
+            pretty: BOOLEAN
+        <span class="keyword">do</span>
+            <span class="comment">-- Required option always has value</span>
+            <span class="keyword">if</span> <span class="keyword">attached</span> cli.option_value (<span class="string">"input"</span>) <span class="keyword">as</span> i <span class="keyword">then</span>
+                input_path := i
+            <span class="keyword">end</span>
+
+            <span class="comment">-- Optional with inline default</span>
+            output_path := cli.option_value_or_default (<span class="string">"output"</span>, <span class="string">""</span>)
+
+            <span class="comment">-- Format has configured default</span>
+            <span class="keyword">if</span> <span class="keyword">attached</span> cli.option_value (<span class="string">"format"</span>) <span class="keyword">as</span> f <span class="keyword">then</span>
+                format := f
+            <span class="keyword">end</span>
+
+            pretty := cli.has_flag (<span class="string">"pretty"</span>)
+
+            <span class="comment">-- Process file...</span>
+            print (<span class="string">"Processing "</span> + input_path + <span class="string">" as "</span> + format + <span class="string">"%N"</span>)
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+
+            <h3>Usage</h3>
+<pre><code># Convert to JSON (default format)
+process -i data.xml -o data.json
+
+# Convert to YAML, pretty printed
+process -i data.json -f yaml -p
+
+# Output to stdout
+process -i data.xml</code></pre>
+        </section>
+
+        <section id="build-tool">
+            <h2>4. Build Tool</h2>
+            <p>Compile/build tool with targets and options.</p>
+
+<pre><code><span class="keyword">class</span> <span class="type">BUILD_TOOL</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span>
+
+    make
+        <span class="keyword">local</span>
+            cli: <span class="type">SIMPLE_CLI</span>
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> cli.make
+            cli.set_app_info (<span class="string">"build"</span>, <span class="string">"Build Eiffel projects"</span>, <span class="string">"2.0.0"</span>)
+
+            <span class="comment">-- Build options</span>
+            cli.add_option (<span class="string">"c|config"</span>, <span class="string">"ECF configuration file"</span>, <span class="string">"FILE"</span>)
+            cli.add_option (<span class="string">"t|target"</span>, <span class="string">"Build target"</span>, <span class="string">"TARGET"</span>)
+            cli.add_option_with_default (<span class="string">"j|jobs"</span>, <span class="string">"Parallel jobs"</span>, <span class="string">"NUM"</span>, <span class="string">"4"</span>)
+
+            <span class="comment">-- Build modes</span>
+            cli.add_flag (<span class="string">"r|release"</span>, <span class="string">"Release build (optimized)"</span>)
+            cli.add_flag (<span class="string">"d|debug"</span>, <span class="string">"Debug build (assertions)"</span>)
+            cli.add_flag (<span class="string">"clean"</span>, <span class="string">"Clean before build"</span>)
+            cli.add_flag (<span class="string">"finalize"</span>, <span class="string">"Finalized build"</span>)
+
+            cli.parse
+
+            <span class="keyword">if</span> cli.help_requested <span class="keyword">then</span>
+                cli.print_help
+            <span class="keyword">elseif</span> cli.has_errors <span class="keyword">then</span>
+                cli.print_errors
+            <span class="keyword">else</span>
+                run_build (cli)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    run_build (cli: <span class="type">SIMPLE_CLI</span>)
+        <span class="keyword">local</span>
+            config_file: STRING
+            jobs: INTEGER
+        <span class="keyword">do</span>
+            config_file := cli.option_value_or_default (<span class="string">"config"</span>, <span class="string">"project.ecf"</span>)
+            jobs := cli.integer_option_or_default (<span class="string">"jobs"</span>, 4)
+
+            <span class="keyword">if</span> cli.has_flag (<span class="string">"clean"</span>) <span class="keyword">then</span>
+                print (<span class="string">"Cleaning...%N"</span>)
+            <span class="keyword">end</span>
+
+            print (<span class="string">"Building "</span> + config_file + <span class="string">" with "</span> + jobs.out + <span class="string">" jobs%N"</span>)
+
+            <span class="keyword">if</span> cli.has_flag (<span class="string">"release"</span>) <span class="keyword">then</span>
+                print (<span class="string">"Mode: Release%N"</span>)
+            <span class="keyword">elseif</span> cli.has_flag (<span class="string">"debug"</span>) <span class="keyword">then</span>
+                print (<span class="string">"Mode: Debug%N"</span>)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="server-app">
+            <h2>5. Server Application</h2>
+            <p>Web server with host/port configuration.</p>
+
+<pre><code><span class="keyword">class</span> <span class="type">WEB_SERVER</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span>
+
+    make
+        <span class="keyword">local</span>
+            cli: <span class="type">SIMPLE_CLI</span>
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> cli.make
+            cli.set_app_info (<span class="string">"server"</span>, <span class="string">"Simple web server"</span>, <span class="string">"1.0.0"</span>)
+
+            <span class="comment">-- Network options</span>
+            cli.add_option_with_default (<span class="string">"H|host"</span>, <span class="string">"Bind address"</span>, <span class="string">"ADDR"</span>, <span class="string">"127.0.0.1"</span>)
+            cli.add_option_with_default (<span class="string">"p|port"</span>, <span class="string">"Port number"</span>, <span class="string">"PORT"</span>, <span class="string">"8080"</span>)
+
+            <span class="comment">-- Path options</span>
+            cli.add_option_with_default (<span class="string">"d|docroot"</span>, <span class="string">"Document root"</span>, <span class="string">"DIR"</span>, <span class="string">"./public"</span>)
+
+            <span class="comment">-- Runtime options</span>
+            cli.add_flag (<span class="string">"daemon"</span>, <span class="string">"Run as daemon"</span>)
+            cli.add_flag (<span class="string">"a|access-log"</span>, <span class="string">"Enable access logging"</span>)
+            cli.add_option (<span class="string">"l|log-file"</span>, <span class="string">"Log file path"</span>, <span class="string">"FILE"</span>)
+
+            cli.parse
+
+            <span class="keyword">if</span> cli.help_requested <span class="keyword">then</span>
+                cli.print_help
+            <span class="keyword">elseif</span> cli.has_errors <span class="keyword">then</span>
+                cli.print_errors
+            <span class="keyword">else</span>
+                start_server (cli)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    start_server (cli: <span class="type">SIMPLE_CLI</span>)
+        <span class="keyword">local</span>
+            host: STRING
+            port: INTEGER
+            docroot: STRING
+        <span class="keyword">do</span>
+            host := cli.option_value_or_default (<span class="string">"host"</span>, <span class="string">"127.0.0.1"</span>)
+            port := cli.integer_option_or_default (<span class="string">"port"</span>, 8080)
+            docroot := cli.option_value_or_default (<span class="string">"docroot"</span>, <span class="string">"./public"</span>)
+
+            print (<span class="string">"Starting server on "</span> + host + <span class="string">":"</span> + port.out + <span class="string">"%N"</span>)
+            print (<span class="string">"Document root: "</span> + docroot + <span class="string">"%N"</span>)
+
+            <span class="keyword">if</span> cli.has_flag (<span class="string">"access-log"</span>) <span class="keyword">then</span>
+                print (<span class="string">"Access logging enabled%N"</span>)
+            <span class="keyword">end</span>
+
+            <span class="comment">-- Start server...</span>
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+
+            <h3>Usage</h3>
+<pre><code># Start on default port
+server
+
+# Custom port and document root
+server -p 3000 -d ./dist
+
+# Production settings
+server --host=0.0.0.0 --port=80 --daemon --access-log</code></pre>
+        </section>
+
+        <section id="data-converter">
+            <h2>6. Data Converter</h2>
+            <p>Convert between data formats.</p>
+
+<pre><code><span class="keyword">class</span> <span class="type">DATA_CONVERTER</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span>
+
+    make
+        <span class="keyword">local</span>
+            cli: <span class="type">SIMPLE_CLI</span>
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> cli.make
+            cli.set_app_info (<span class="string">"convert"</span>, <span class="string">"Convert between data formats"</span>, <span class="string">"1.0.0"</span>)
+
+            <span class="comment">-- Format options</span>
+            cli.add_required_option (<span class="string">"f|from"</span>, <span class="string">"Input format"</span>, <span class="string">"FORMAT"</span>)
+            cli.add_required_option (<span class="string">"t|to"</span>, <span class="string">"Output format"</span>, <span class="string">"FORMAT"</span>)
+
+            <span class="comment">-- I/O</span>
+            cli.add_option (<span class="string">"i|input"</span>, <span class="string">"Input file (stdin if omitted)"</span>, <span class="string">"FILE"</span>)
+            cli.add_option (<span class="string">"o|output"</span>, <span class="string">"Output file (stdout if omitted)"</span>, <span class="string">"FILE"</span>)
+
+            <span class="comment">-- Options</span>
+            cli.add_flag (<span class="string">"p|pretty"</span>, <span class="string">"Pretty print"</span>)
+            cli.add_option (<span class="string">"indent"</span>, <span class="string">"Indentation spaces"</span>, <span class="string">"NUM"</span>)
+
+            cli.parse
+
+            <span class="keyword">if</span> cli.help_requested <span class="keyword">then</span>
+                print_help
+            <span class="keyword">elseif</span> cli.has_errors <span class="keyword">then</span>
+                cli.print_errors
+            <span class="keyword">else</span>
+                convert (cli)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    print_help
+        <span class="keyword">do</span>
+            print (<span class="string">"convert - Data format converter%N"</span>)
+            print (<span class="string">"%NSupported formats: json, yaml, xml, csv, toml%N"</span>)
+            print (<span class="string">"%NExamples:%N"</span>)
+            print (<span class="string">"  convert -f json -t yaml -i data.json -o data.yaml%N"</span>)
+            print (<span class="string">"  convert --from=csv --to=json < data.csv%N"</span>)
+        <span class="keyword">end</span>
+
+    convert (cli: <span class="type">SIMPLE_CLI</span>)
+        <span class="keyword">local</span>
+            from_fmt, to_fmt: STRING
+            indent: INTEGER
+        <span class="keyword">do</span>
+            <span class="keyword">if</span> <span class="keyword">attached</span> cli.option_value (<span class="string">"from"</span>) <span class="keyword">as</span> f <span class="keyword">then</span>
+                from_fmt := f
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> <span class="keyword">attached</span> cli.option_value (<span class="string">"to"</span>) <span class="keyword">as</span> t <span class="keyword">then</span>
+                to_fmt := t
+            <span class="keyword">end</span>
+
+            indent := cli.integer_option_or_default (<span class="string">"indent"</span>, 2)
+
+            print (<span class="string">"Converting from "</span> + from_fmt + <span class="string">" to "</span> + to_fmt + <span class="string">"%N"</span>)
+            <span class="comment">-- Conversion logic...</span>
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="test-runner">
+            <h2>7. Test Runner</h2>
+            <p>Run tests with filtering and output options.</p>
+
+<pre><code><span class="keyword">class</span> <span class="type">TEST_RUNNER</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span>
+
+    make
+        <span class="keyword">local</span>
+            cli: <span class="type">SIMPLE_CLI</span>
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> cli.make
+            cli.set_app_info (<span class="string">"test"</span>, <span class="string">"Eiffel test runner"</span>, <span class="string">"1.0.0"</span>)
+
+            <span class="comment">-- Test selection</span>
+            cli.add_option (<span class="string">"f|filter"</span>, <span class="string">"Run tests matching pattern"</span>, <span class="string">"PATTERN"</span>)
+            cli.add_option (<span class="string">"t|tag"</span>, <span class="string">"Run tests with tag"</span>, <span class="string">"TAG"</span>)
+
+            <span class="comment">-- Output</span>
+            cli.add_flag (<span class="string">"v|verbose"</span>, <span class="string">"Verbose output"</span>)
+            cli.add_flag (<span class="string">"q|quiet"</span>, <span class="string">"Only show failures"</span>)
+            cli.add_option_with_default (<span class="string">"format"</span>, <span class="string">"Output format"</span>, <span class="string">"FMT"</span>, <span class="string">"text"</span>)
+
+            <span class="comment">-- Execution</span>
+            cli.add_flag (<span class="string">"fail-fast"</span>, <span class="string">"Stop on first failure"</span>)
+            cli.add_option_with_default (<span class="string">"timeout"</span>, <span class="string">"Test timeout (seconds)"</span>, <span class="string">"SEC"</span>, <span class="string">"30"</span>)
+
+            cli.parse
+
+            <span class="keyword">if</span> cli.help_requested <span class="keyword">then</span>
+                cli.print_help
+            <span class="keyword">elseif</span> cli.has_errors <span class="keyword">then</span>
+                cli.print_errors
+            <span class="keyword">else</span>
+                run_tests (cli)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    run_tests (cli: <span class="type">SIMPLE_CLI</span>)
+        <span class="keyword">local</span>
+            timeout: INTEGER
+            filter: detachable STRING
+        <span class="keyword">do</span>
+            timeout := cli.integer_option_or_default (<span class="string">"timeout"</span>, 30)
+            filter := cli.option_value (<span class="string">"filter"</span>)
+
+            <span class="keyword">if</span> <span class="keyword">attached</span> filter <span class="keyword">then</span>
+                print (<span class="string">"Running tests matching: "</span> + filter + <span class="string">"%N"</span>)
+            <span class="keyword">else</span>
+                print (<span class="string">"Running all tests%N"</span>)
+            <span class="keyword">end</span>
+
+            print (<span class="string">"Timeout: "</span> + timeout.out + <span class="string">"s%N"</span>)
+
+            <span class="keyword">if</span> cli.has_flag (<span class="string">"fail-fast"</span>) <span class="keyword">then</span>
+                print (<span class="string">"Stopping on first failure%N"</span>)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+
+            <h3>Usage</h3>
+<pre><code># Run all tests
+test
+
+# Run specific tests
+test --filter="*json*"
+test --tag=unit
+
+# CI mode
+test --format=junit --quiet --fail-fast</code></pre>
+        </section>
+
+        <section id="deployment">
+            <h2>8. Deployment Tool</h2>
+            <p>Deploy applications with environment selection.</p>
+
+<pre><code><span class="keyword">class</span> <span class="type">DEPLOY_TOOL</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span>
+
+    make
+        <span class="keyword">local</span>
+            cli: <span class="type">SIMPLE_CLI</span>
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> cli.make
+            cli.set_app_info (<span class="string">"deploy"</span>, <span class="string">"Deployment tool"</span>, <span class="string">"1.0.0"</span>)
+
+            <span class="comment">-- Environment</span>
+            cli.add_required_option (<span class="string">"e|env"</span>, <span class="string">"Target environment"</span>, <span class="string">"ENV"</span>)
+
+            <span class="comment">-- Options</span>
+            cli.add_option (<span class="string">"b|branch"</span>, <span class="string">"Git branch"</span>, <span class="string">"BRANCH"</span>)
+            cli.add_option (<span class="string">"tag"</span>, <span class="string">"Deploy specific tag"</span>, <span class="string">"TAG"</span>)
+
+            <span class="comment">-- Flags</span>
+            cli.add_flag (<span class="string">"n|dry-run"</span>, <span class="string">"Show what would be done"</span>)
+            cli.add_flag (<span class="string">"f|force"</span>, <span class="string">"Force deployment"</span>)
+            cli.add_flag (<span class="string">"skip-tests"</span>, <span class="string">"Skip test suite"</span>)
+            cli.add_flag (<span class="string">"y|yes"</span>, <span class="string">"Skip confirmation"</span>)
+
+            cli.parse
+
+            <span class="keyword">if</span> cli.help_requested <span class="keyword">then</span>
+                print_help
+            <span class="keyword">elseif</span> cli.has_errors <span class="keyword">then</span>
+                cli.print_errors
+            <span class="keyword">else</span>
+                deploy (cli)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    print_help
+        <span class="keyword">do</span>
+            print (<span class="string">"deploy - Deployment tool%N"</span>)
+            print (<span class="string">"%NEnvironments: staging, production%N"</span>)
+            print (<span class="string">"%NExamples:%N"</span>)
+            print (<span class="string">"  deploy -e staging           Deploy to staging%N"</span>)
+            print (<span class="string">"  deploy -e production -y     Deploy to production (no prompt)%N"</span>)
+            print (<span class="string">"  deploy -e staging -n        Dry run%N"</span>)
+        <span class="keyword">end</span>
+
+    deploy (cli: <span class="type">SIMPLE_CLI</span>)
+        <span class="keyword">local</span>
+            env, branch: STRING
+        <span class="keyword">do</span>
+            <span class="keyword">if</span> <span class="keyword">attached</span> cli.option_value (<span class="string">"env"</span>) <span class="keyword">as</span> e <span class="keyword">then</span>
+                env := e
+            <span class="keyword">end</span>
+            branch := cli.option_value_or_default (<span class="string">"branch"</span>, <span class="string">"main"</span>)
+
+            <span class="keyword">if</span> cli.has_flag (<span class="string">"dry-run"</span>) <span class="keyword">then</span>
+                print (<span class="string">"[DRY RUN] "</span>)
+            <span class="keyword">end</span>
+
+            print (<span class="string">"Deploying "</span> + branch + <span class="string">" to "</span> + env + <span class="string">"%N"</span>)
+
+            <span class="keyword">if</span> env.same_string (<span class="string">"production"</span>) <span class="keyword">and</span> <span class="keyword">not</span> cli.has_flag (<span class="string">"yes"</span>) <span class="keyword">then</span>
+                print (<span class="string">"Are you sure? Use -y to skip confirmation%N"</span>)
+                <span class="keyword">return</span>
+            <span class="keyword">end</span>
+
+            <span class="comment">-- Deployment logic...</span>
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p>Part of the <a href="https://github.com/simple-eiffel">simple_*</a> ecosystem of focused, single-purpose Eiffel libraries.</p>
+        <p>&copy; 2025 Larry Rix. MIT License.</p>
+    </footer>
+</body>
+</html>
