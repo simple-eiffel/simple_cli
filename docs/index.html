@@ -3,22 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>simple_cli - Documentation</title>
+    <title>simple_cli - Command-Line Parser for Eiffel</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" type="image/png" href="images/logo.png">
 </head>
 <body>
     <header>
         <div class="logo-container">
-            <img src="images/logo.png" alt="simple_* logo" class="logo">
+            <img src="https://raw.githubusercontent.com/simple-eiffel/claude_eiffel_op_docs/main/artwork/LOGO.png" alt="simple_* logo" class="logo">
         </div>
         <h1>simple_cli</h1>
-        <p class="tagline">Command-line argument parsing with fluent API</p>
+        <p class="tagline">Command-Line Argument Parsing for Eiffel</p>
+        <div class="badges">
+            <span class="badge badge-version">v1.0.0</span>
+            <span class="badge badge-license">MIT</span>
+        </div>
     </header>
 
     <nav>
         <ul>
-            <li><a href="index.html" class="active">Overview</a></li>
+            <li><a href="#overview">Overview</a></li>
             <li><a href="user-guide.html">User Guide</a></li>
             <li><a href="api-reference.html">API Reference</a></li>
             <li><a href="architecture.html">Architecture</a></li>
@@ -30,26 +33,14 @@
     <main>
         <section id="overview">
             <h2>Overview</h2>
-            <p>simple_cli provides a clean, fluent API for parsing command-line arguments in Eiffel applications. It handles flags, options with values, positional arguments, subcommands, and automatic help generation.</p>
-
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <h3>Fluent API</h3>
-                    <p>Chain configuration calls for clean, readable option definitions.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Flags & Options</h3>
-                    <p>Boolean flags, string options, defaults, and required options.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Typed Access</h3>
-                    <p>Get values as strings, integers, or booleans with defaults.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Auto Help</h3>
-                    <p>Generates formatted help text from option definitions.</p>
-                </div>
-            </div>
+            <p>
+                <strong>simple_cli</strong> provides a clean, fluent API for parsing command-line arguments
+                in Eiffel applications. It handles flags, options with values, positional arguments,
+                subcommands, and automatic help generation.
+            </p>
+            <p>
+                Part of the <a href="https://github.com/simple-eiffel">Simple Eiffel</a> ecosystem.
+            </p>
         </section>
 
         <section id="quick-start">
@@ -87,9 +78,6 @@
         <span class="keyword">if</span> cli.has_flag (<span class="string">"verbose"</span>) <span class="keyword">then</span>
             print (<span class="string">"Verbose mode%N"</span>)
         <span class="keyword">end</span>
-        <span class="keyword">if</span> <span class="keyword">attached</span> cli.option_value (<span class="string">"output"</span>) <span class="keyword">as</span> f <span class="keyword">then</span>
-            print (<span class="string">"Output: "</span> + f + <span class="string">"%N"</span>)
-        <span class="keyword">end</span>
     <span class="keyword">end</span>
 <span class="keyword">end</span></code></pre>
         </section>
@@ -97,109 +85,43 @@
         <section id="features">
             <h2>Key Features</h2>
 
-            <h3>Configuration</h3>
-            <ul>
-                <li><code>set_app_info (name, desc, version)</code> - Application metadata</li>
-                <li><code>add_flag (names, desc)</code> - Boolean switch</li>
-                <li><code>add_option (names, desc, arg)</code> - Option with value</li>
-                <li><code>add_option_with_default (names, desc, arg, default)</code> - With default</li>
-                <li><code>add_required_option (names, desc, arg)</code> - Required option</li>
-            </ul>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Fluent API</h3>
+                    <p>Chain configuration calls for clean, readable option definitions.</p>
+                </div>
 
-            <h3>Name Formats</h3>
-            <ul>
-                <li><code>"v|verbose"</code> - Short and long: -v or --verbose</li>
-                <li><code>"debug"</code> - Long only: --debug</li>
-                <li><code>"d|dry-run"</code> - Multi-word: -d or --dry-run</li>
-            </ul>
+                <div class="feature-card">
+                    <h3>Flags & Options</h3>
+                    <p>Boolean flags, string options, defaults, and required options.</p>
+                </div>
 
-            <h3>Command-Line Formats</h3>
-            <ul>
-                <li><code>--verbose</code> - Long flag</li>
-                <li><code>-v</code> - Short flag</li>
-                <li><code>-vdf</code> - Combined short flags</li>
-                <li><code>--output=file.txt</code> - Long option with =</li>
-                <li><code>--output file.txt</code> - Long option with space</li>
-                <li><code>-o file.txt</code> - Short option with space</li>
-                <li><code>-ofile.txt</code> - Short option attached</li>
-            </ul>
+                <div class="feature-card">
+                    <h3>Short & Long Names</h3>
+                    <p>Define both formats: "v|verbose" gives -v and --verbose.</p>
+                </div>
 
-            <h3>Access</h3>
-            <ul>
-                <li><code>has_flag (name)</code> - Check boolean flag</li>
-                <li><code>option_value (name)</code> - Get string value</li>
-                <li><code>integer_option (name)</code> - Get as integer</li>
-                <li><code>boolean_option (name)</code> - Get as boolean</li>
-                <li><code>command</code> - First positional argument</li>
-                <li><code>arguments</code> - All positional arguments</li>
-            </ul>
+                <div class="feature-card">
+                    <h3>Auto Help</h3>
+                    <p>Generates formatted help text from option definitions.</p>
+                </div>
 
-            <h3>Help Generation</h3>
-            <ul>
-                <li><code>help_text</code> - Generate help string</li>
-                <li><code>print_help</code> - Print to stdout</li>
-                <li><code>help_requested</code> - Was -h/--help used?</li>
-                <li><code>version_requested</code> - Was -V/--version used?</li>
-            </ul>
-        </section>
+                <div class="feature-card">
+                    <h3>Typed Access</h3>
+                    <p>Get values as strings, integers, or booleans with defaults.</p>
+                </div>
 
-        <section id="why">
-            <h2>Why simple_cli?</h2>
-
-            <h3>vs. Manual Parsing</h3>
-            <table class="api-table">
-                <tr>
-                    <th>Feature</th>
-                    <th>Manual Parsing</th>
-                    <th>SIMPLE_CLI</th>
-                </tr>
-                <tr>
-                    <td>Setup code</td>
-                    <td>50+ lines</td>
-                    <td>5-10 lines</td>
-                </tr>
-                <tr>
-                    <td>Help generation</td>
-                    <td>Manual</td>
-                    <td>Automatic</td>
-                </tr>
-                <tr>
-                    <td>Error handling</td>
-                    <td>Manual</td>
-                    <td>Built-in</td>
-                </tr>
-                <tr>
-                    <td>Short/long names</td>
-                    <td>Complex</td>
-                    <td>"v|verbose"</td>
-                </tr>
-                <tr>
-                    <td>Typed values</td>
-                    <td>Manual conversion</td>
-                    <td>integer_option, boolean_option</td>
-                </tr>
-                <tr>
-                    <td>Defaults</td>
-                    <td>Manual</td>
-                    <td>add_option_with_default</td>
-                </tr>
-            </table>
-        </section>
-
-        <section id="documentation">
-            <h2>Documentation</h2>
-            <ul>
-                <li><a href="user-guide.html">User Guide</a> - Complete tutorial with examples</li>
-                <li><a href="api-reference.html">API Reference</a> - Full API with contracts</li>
-                <li><a href="architecture.html">Architecture</a> - Internal design and parsing phases</li>
-                <li><a href="cookbook.html">Cookbook</a> - Ready-to-use recipes for common patterns</li>
-            </ul>
+                <div class="feature-card">
+                    <h3>Subcommands</h3>
+                    <p>Git-style commands with arguments_after_command.</p>
+                </div>
+            </div>
         </section>
 
         <section id="examples">
-            <h2>More Examples</h2>
+            <h2>Examples</h2>
 
-            <h3>Subcommand-Style CLI</h3>
+            <h3>Subcommand Pattern</h3>
 <pre><code><span class="keyword">local</span>
     cli: <span class="type">SIMPLE_CLI</span>
 <span class="keyword">do</span>
@@ -216,46 +138,42 @@
                 install_package (pkg)
             <span class="keyword">end</span>
         <span class="keyword">when</span> <span class="string">"remove"</span> <span class="keyword">then</span>
-            <span class="comment">-- pkg remove package1</span>
-            <span class="keyword">if</span> cli.arguments_after_command.count > 0 <span class="keyword">then</span>
-                remove_package (cli.arguments_after_command.first)
-            <span class="keyword">end</span>
+            handle_remove (cli)
         <span class="keyword">else</span>
-            print (<span class="string">"Unknown command: "</span> + cmd + <span class="string">"%N"</span>)
+            print (<span class="string">"Unknown command%N"</span>)
         <span class="keyword">end</span>
-    <span class="keyword">else</span>
-        cli.print_help
     <span class="keyword">end</span>
 <span class="keyword">end</span></code></pre>
 
             <h3>Required Options</h3>
-<pre><code><span class="keyword">local</span>
-    cli: <span class="type">SIMPLE_CLI</span>
-<span class="keyword">do</span>
-    <span class="keyword">create</span> cli.make
-    cli.set_app_info (<span class="string">"convert"</span>, <span class="string">"File Converter"</span>, <span class="string">"1.0.0"</span>)
-    cli.add_required_option (<span class="string">"i|input"</span>, <span class="string">"Input file"</span>, <span class="string">"FILE"</span>)
-    cli.add_required_option (<span class="string">"o|output"</span>, <span class="string">"Output file"</span>, <span class="string">"FILE"</span>)
-    cli.add_option_with_default (<span class="string">"f|format"</span>, <span class="string">"Output format"</span>, <span class="string">"FORMAT"</span>, <span class="string">"json"</span>)
-    cli.parse
+<pre><code>cli.add_required_option (<span class="string">"i|input"</span>, <span class="string">"Input file"</span>, <span class="string">"FILE"</span>)
+cli.add_required_option (<span class="string">"o|output"</span>, <span class="string">"Output file"</span>, <span class="string">"FILE"</span>)
+cli.add_option_with_default (<span class="string">"f|format"</span>, <span class="string">"Format"</span>, <span class="string">"FMT"</span>, <span class="string">"json"</span>)
+cli.parse
 
-    <span class="keyword">if</span> cli.has_errors <span class="keyword">then</span>
-        cli.print_errors
-        cli.print_help
-    <span class="keyword">else</span>
-        <span class="comment">-- Required options guaranteed to have values</span>
-        <span class="keyword">if</span> <span class="keyword">attached</span> cli.option_value (<span class="string">"input"</span>) <span class="keyword">as</span> inp <span class="keyword">and then</span>
-           <span class="keyword">attached</span> cli.option_value (<span class="string">"output"</span>) <span class="keyword">as</span> out <span class="keyword">then</span>
-            convert_file (inp, out, cli.option_value_or_default (<span class="string">"format"</span>, <span class="string">"json"</span>))
-        <span class="keyword">end</span>
-    <span class="keyword">end</span>
+<span class="keyword">if</span> cli.has_errors <span class="keyword">then</span>
+    <span class="comment">-- "Required option missing: --input"</span>
+    cli.print_errors
 <span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="documentation">
+            <h2>Documentation</h2>
+            <ul class="doc-links">
+                <li><a href="user-guide.html"><strong>User Guide</strong></a> - Complete tutorial with examples</li>
+                <li><a href="api-reference.html"><strong>API Reference</strong></a> - Full feature documentation</li>
+                <li><a href="architecture.html"><strong>Architecture</strong></a> - Internal design and rationale</li>
+                <li><a href="cookbook.html"><strong>Cookbook</strong></a> - Real-world recipes and patterns</li>
+            </ul>
         </section>
     </main>
 
     <footer>
-        <p>Part of the <a href="https://github.com/simple-eiffel">simple_*</a> ecosystem of focused, single-purpose Eiffel libraries.</p>
-        <p>&copy; 2025 Larry Rix. MIT License.</p>
+        <p>&copy; 2025 simple_* ecosystem. MIT License.</p>
+        <p>
+            <a href="https://github.com/simple-eiffel/simple_cli">GitHub</a> |
+            <a href="https://simple-eiffel.github.io">Documentation</a>
+        </p>
     </footer>
 </body>
 </html>
