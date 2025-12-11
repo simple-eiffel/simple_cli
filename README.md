@@ -1,45 +1,64 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/simple-eiffel/claude_eiffel_op_docs/main/artwork/LOGO.png" alt="simple_ library logo" width="400">
+</p>
+
 # simple_cli
 
-Easy command-line argument parsing for Eiffel applications.
+**[Documentation](https://simple-eiffel.github.io/simple_cli/)** | **[GitHub](https://github.com/simple-eiffel/simple_cli)**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Eiffel](https://img.shields.io/badge/Eiffel-25.02-blue.svg)](https://www.eiffel.org/)
+[![Design by Contract](https://img.shields.io/badge/DbC-enforced-orange.svg)]()
+
+Command-line argument parsing for Eiffel applications.
+
+Part of the [Simple Eiffel](https://github.com/simple-eiffel) ecosystem.
+
+## Status
+
+**Production**
+
+## Overview
+
+SIMPLE_CLI provides a fluent API for parsing command-line arguments. Supports flags, options with values, positional arguments, subcommands, and automatic help generation.
+
+```eiffel
+local
+    cli: SIMPLE_CLI
+do
+    create cli.make
+    cli.set_app_info ("myapp", "My Application", "1.0.0")
+    cli.add_flag ("v|verbose", "Enable verbose output")
+    cli.add_option ("o|output", "Output file", "FILE")
+    cli.parse
+
+    if cli.has_flag ("verbose") then
+        print ("Verbose mode%N")
+    end
+end
+```
 
 ## Features
 
-- Simple, fluent API for defining CLI options
-- Support for flags (boolean switches) and options with values
-- Short and long name formats (`-v`, `--verbose`)
-- Automatic help text generation
-- Command-based parsing (git-style subcommands)
+- **Fluent API** - Chain configuration calls cleanly
+- **Flags & Options** - Boolean flags, string options with defaults
+- **Short & Long Names** - "v|verbose" gives -v and --verbose
+- **Auto Help** - Generates formatted help from definitions
+- **Subcommands** - Git-style command parsing
+- **Typed Access** - Get values as strings, integers, or booleans
 
 ## Installation
 
-Add to your ECF file:
+1. Set environment variable:
+```bash
+export SIMPLE_CLI=/path/to/simple_cli
+```
 
+2. Add to ECF:
 ```xml
-<library name="simple_cli" location="$SIMPLE_CLI\simple_cli.ecf"/>
+<library name="simple_cli" location="$SIMPLE_CLI/simple_cli.ecf"/>
 ```
-
-## Quick Start
-
-```eiffel
-create cli.make
-cli.set_app_info ("myapp", "My Application", "1.0.0")
-cli.add_flag ("v|verbose", "Enable verbose output")
-cli.add_option ("o|output", "Output file", "FILE")
-cli.parse
-
-if cli.has_flag ("verbose") then
-    print ("Verbose mode enabled%N")
-end
-
-if attached cli.option_value ("output") as l_file then
-    print ("Output: " + l_file + "%N")
-end
-```
-
-## Documentation
-
-See [docs/index.html](docs/index.html) for full API documentation.
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT License
