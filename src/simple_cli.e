@@ -54,7 +54,9 @@ feature -- Configuration
 			version_set: app_version = a_version
 		end
 
-	add_flag (a_names, a_description: STRING)
+	add_flag,
+	define_flag,
+	flag (a_names, a_description: STRING)
 			-- Add a boolean flag.
 			-- `a_names' can be "v|verbose" for short and long forms.
 		require
@@ -75,7 +77,9 @@ feature -- Configuration
 			all_flag_names.extend (l_long.as_lower)
 		end
 
-	add_option (a_names, a_description, a_arg_name: STRING)
+	add_option,
+	define_option,
+	option_def (a_names, a_description, a_arg_name: STRING)
 			-- Add an option with a value.
 			-- `a_names' can be "o|output" for short and long forms.
 		require
@@ -114,7 +118,10 @@ feature -- Configuration
 
 feature -- Parsing
 
-	parse
+	parse,
+	run,
+	process_args,
+	process_arguments
 			-- Parse command-line arguments.
 			-- Sets `help_requested' or `version_requested' if those flags are used.
 		local
@@ -157,7 +164,10 @@ feature -- Parsing
 
 feature -- Access: Flags
 
-	has_flag (a_name: STRING): BOOLEAN
+	has_flag,
+	flag_set,
+	is_flag,
+	flag_exists (a_name: STRING): BOOLEAN
 			-- Is the flag `a_name' set?
 		require
 			parsed: has_parsed
@@ -167,7 +177,9 @@ feature -- Access: Flags
 
 feature -- Access: String Options
 
-	option_value (a_name: STRING): detachable STRING
+	option_value,
+	get_option,
+	value_of (a_name: STRING): detachable STRING
 			-- Get value for option `a_name' (or default if set).
 		require
 			parsed: has_parsed
@@ -194,7 +206,9 @@ feature -- Access: String Options
 			end
 		end
 
-	has_option (a_name: STRING): BOOLEAN
+	has_option,
+	option_set,
+	option_exists (a_name: STRING): BOOLEAN
 			-- Is the option `a_name' set (or has default)?
 		require
 			parsed: has_parsed
@@ -247,7 +261,9 @@ feature -- Access: Boolean Options
 
 feature -- Access: Arguments
 
-	command: detachable STRING
+	command,
+	subcommand,
+	first_arg: detachable STRING
 			-- First positional argument (the command).
 		require
 			parsed: has_parsed
@@ -257,7 +273,9 @@ feature -- Access: Arguments
 			end
 		end
 
-	arguments: LIST [STRING]
+	arguments,
+	args,
+	positional_args: LIST [STRING]
 			-- All positional arguments.
 		require
 			parsed: has_parsed
@@ -313,7 +331,9 @@ feature -- Status
 
 feature -- Help
 
-	help_text: STRING
+	help_text,
+	usage,
+	help_message: STRING
 			-- Generate help text.
 		local
 			l_name, l_default: STRING

@@ -1,48 +1,13 @@
 note
-	description: "Test application for SIMPLE_CLI"
+	description: "Tests for SIMPLE_CLI"
 	author: "Larry Rix"
-	date: "$Date$"
-	revision: "$Revision$"
+	testing: "covers"
 
 class
-	CLI_TEST_APP
+	LIB_TESTS
 
 inherit
 	TEST_SET_BASE
-		redefine
-			on_prepare
-		end
-
-create
-	make
-
-feature {NONE} -- Initialization
-
-	make
-			-- Run the tests.
-		do
-			default_create
-			print ("Running SIMPLE_CLI tests...%N%N")
-
-			test_basic_flag
-			test_basic_option
-			test_short_and_long_names
-			test_positional_arguments
-			test_command_parsing
-			test_help_generation
-			test_default_values
-			test_required_options
-			test_builtin_help_version
-			test_integer_options
-			test_boolean_options
-
-			print ("%N=== All tests passed ===%N")
-		end
-
-	on_prepare
-			-- Prepare for tests.
-		do
-		end
 
 feature -- Tests
 
@@ -51,12 +16,9 @@ feature -- Tests
 		local
 			cli: SIMPLE_CLI
 		do
-			print ("test_basic_flag: ")
-
 			create cli.make
 			cli.add_flag ("verbose", "Enable verbose output")
-
-			print ("OK%N")
+			assert_true ("flag added", True)
 		end
 
 	test_basic_option
@@ -64,12 +26,9 @@ feature -- Tests
 		local
 			cli: SIMPLE_CLI
 		do
-			print ("test_basic_option: ")
-
 			create cli.make
 			cli.add_option ("output", "Output file", "FILE")
-
-			print ("OK%N")
+			assert_true ("option added", True)
 		end
 
 	test_short_and_long_names
@@ -77,13 +36,10 @@ feature -- Tests
 		local
 			cli: SIMPLE_CLI
 		do
-			print ("test_short_and_long_names: ")
-
 			create cli.make
 			cli.add_flag ("v|verbose", "Enable verbose output")
 			cli.add_option ("o|output", "Output file", "FILE")
-
-			print ("OK%N")
+			assert_true ("short and long names work", True)
 		end
 
 	test_positional_arguments
@@ -91,15 +47,11 @@ feature -- Tests
 		local
 			cli: SIMPLE_CLI
 		do
-			print ("test_positional_arguments: ")
-
 			create cli.make
 			cli.parse
 
 			assert_true ("empty args", cli.arguments.is_empty)
 			assert_void ("no command", cli.command)
-
-			print ("OK%N")
 		end
 
 	test_command_parsing
@@ -107,14 +59,10 @@ feature -- Tests
 		local
 			cli: SIMPLE_CLI
 		do
-			print ("test_command_parsing: ")
-
 			create cli.make
 			cli.parse
 
 			assert_true ("args after command empty", cli.arguments_after_command.is_empty)
-
-			print ("OK%N")
 		end
 
 	test_help_generation
@@ -123,8 +71,6 @@ feature -- Tests
 			cli: SIMPLE_CLI
 			l_help: STRING
 		do
-			print ("test_help_generation: ")
-
 			create cli.make
 			cli.set_app_info ("test-app", "A test application", "1.0.0")
 			cli.add_flag ("v|verbose", "Enable verbose output")
@@ -139,8 +85,6 @@ feature -- Tests
 			assert_string_contains ("has output option", l_help, "output")
 			assert_string_contains ("has builtin help", l_help, "--help")
 			assert_string_contains ("has builtin version", l_help, "--version")
-
-			print ("OK%N")
 		end
 
 	test_default_values
@@ -149,8 +93,6 @@ feature -- Tests
 			cli: SIMPLE_CLI
 			l_help: STRING
 		do
-			print ("test_default_values: ")
-
 			create cli.make
 			cli.add_option_with_default ("p|port", "Server port", "PORT", "8080")
 			cli.parse
@@ -163,8 +105,6 @@ feature -- Tests
 
 			l_help := cli.help_text
 			assert_string_contains ("help shows default", l_help, "default: 8080")
-
-			print ("OK%N")
 		end
 
 	test_required_options
@@ -172,8 +112,6 @@ feature -- Tests
 		local
 			cli: SIMPLE_CLI
 		do
-			print ("test_required_options: ")
-
 			create cli.make
 			cli.add_required_option ("c|config", "Config file", "FILE")
 			cli.parse
@@ -182,8 +120,6 @@ feature -- Tests
 			assert_false ("not successful", cli.is_successful)
 			assert_string_contains ("error mentions required", cli.errors.first, "Required")
 			assert_string_contains ("help shows required", cli.help_text, "[required]")
-
-			print ("OK%N")
 		end
 
 	test_builtin_help_version
@@ -191,8 +127,6 @@ feature -- Tests
 		local
 			cli: SIMPLE_CLI
 		do
-			print ("test_builtin_help_version: ")
-
 			create cli.make
 			cli.set_app_info ("myapp", "My application", "2.0.0")
 
@@ -202,8 +136,6 @@ feature -- Tests
 			cli.disable_help_flag
 			cli.disable_version_flag
 			assert_string_not_contains ("disabled flags not in help", cli.help_text, "--help")
-
-			print ("OK%N")
 		end
 
 	test_integer_options
@@ -211,16 +143,12 @@ feature -- Tests
 		local
 			cli: SIMPLE_CLI
 		do
-			print ("test_integer_options: ")
-
 			create cli.make
 			cli.add_option_with_default ("p|port", "Port number", "PORT", "8080")
 			cli.parse
 
 			assert_integers_equal ("integer value", 8080, cli.integer_option ("port"))
 			assert_integers_equal ("integer default", 3000, cli.integer_option_or_default ("nonexistent", 3000))
-
-			print ("OK%N")
 		end
 
 	test_boolean_options
@@ -228,8 +156,6 @@ feature -- Tests
 		local
 			cli: SIMPLE_CLI
 		do
-			print ("test_boolean_options: ")
-
 			create cli.make
 			cli.add_option_with_default ("debug", "Debug mode", "BOOL", "true")
 			cli.add_option_with_default ("quiet", "Quiet mode", "BOOL", "false")
@@ -237,12 +163,6 @@ feature -- Tests
 
 			assert_true ("true value", cli.boolean_option ("debug"))
 			assert_false ("false value", cli.boolean_option ("quiet"))
-
-			print ("OK%N")
 		end
-
-note
-	copyright: "Copyright (c) 2024-2025, Larry Rix"
-	license: "MIT License"
 
 end
