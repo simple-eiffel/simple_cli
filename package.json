@@ -1,0 +1,9 @@
+{
+  "name": "simple_cli",
+  "version": "0.1.0",
+  "description": "Simple CLI Library - Easy command-line argument parsing",
+  "author": "Larry Rix",
+  "license": "MIT",
+  "category": "cli",
+  "keywords": ["cli", "command-line", "arguments", "parser"]
+}
