@@ -1,0 +1,161 @@
+================================================================================
+SIMPLE_CLI - Flat Short API Reference (Backwash from Implementation)
+================================================================================
+Generated: 2026-01-23
+Status: Reverse-engineered from implementation
+================================================================================
+
+class SIMPLE_CLI
+
+inherit
+    ARGUMENTS_32
+
+create
+    make
+
+feature -- Configuration
+
+    set_app_info (a_name, a_description, a_version: STRING)
+        -- Set application info for help output.
+        require
+            name_not_empty: not a_name.is_empty
+        ensure
+            name_set: app_name = a_name
+            description_set: app_description = a_description
+            version_set: app_version = a_version
+
+    add_flag, define_flag, flag (a_names, a_description: STRING)
+        -- Add a boolean flag.
+        -- `a_names' can be "v|verbose" for short and long forms.
+        require
+            names_not_empty: not a_names.is_empty
+
+    add_option, define_option, option_def (a_names, a_description, a_arg_name: STRING)
+        -- Add an option with a value.
+        -- `a_names' can be "o|output" for short and long forms.
+        require
+            names_not_empty: not a_names.is_empty
+
+    add_option_with_default (a_names, a_description, a_arg_name, a_default: STRING)
+        -- Add an option with a default value.
+        require
+            names_not_empty: not a_names.is_empty
+
+    add_required_option (a_names, a_description, a_arg_name: STRING)
+        -- Add a required option (must be provided).
+        require
+            names_not_empty: not a_names.is_empty
+
+    disable_help_flag
+        -- Disable built-in -h/--help handling.
+
+    disable_version_flag
+        -- Disable built-in -V/--version handling.
+
+feature -- Parsing
+
+    parse, run, process_args, process_arguments
+        -- Parse command-line arguments.
+        -- Sets `help_requested' or `version_requested' if those flags are used.
+        ensure
+            parsed: has_parsed
+
+feature -- Access: Flags
+
+    has_flag, flag_set, is_flag, flag_exists (a_name: STRING): BOOLEAN
+        -- Is the flag `a_name' set?
+        require
+            parsed: has_parsed
+
+feature -- Access: String Options
+
+    option_value, get_option, value_of (a_name: STRING): detachable STRING
+        -- Get value for option `a_name' (or default if set).
+        require
+            parsed: has_parsed
+
+    option_value_or_default (a_name, a_default: STRING): STRING
+        -- Get value for option `a_name', or `a_default' if not found.
+        require
+            parsed: has_parsed
+
+    has_option, option_set, option_exists (a_name: STRING): BOOLEAN
+        -- Is the option `a_name' set (or has default)?
+        require
+            parsed: has_parsed
+
+feature -- Access: Integer Options
+
+    integer_option (a_name: STRING): INTEGER
+        -- Get integer value for option `a_name' (0 if not found or not integer).
+        require
+            parsed: has_parsed
+
+    integer_option_or_default (a_name: STRING; a_default: INTEGER): INTEGER
+        -- Get integer value for option `a_name', or `a_default'.
+        require
+            parsed: has_parsed
+
+feature -- Access: Boolean Options
+
+    boolean_option (a_name: STRING): BOOLEAN
+        -- Get boolean value for option `a_name'.
+        -- Recognizes: "true", "false", "yes", "no", "1", "0"
+        require
+            parsed: has_parsed
+
+feature -- Access: Arguments
+
+    command, subcommand, first_arg: detachable STRING
+        -- First positional argument (the command).
+        require
+            parsed: has_parsed
+
+    arguments, args, positional_args: LIST [STRING]
+        -- All positional arguments.
+        require
+            parsed: has_parsed
+
+    arguments_after_command: LIST [STRING]
+        -- Arguments after the command.
+        require
+            parsed: has_parsed
+
+feature -- Status
+
+    has_parsed: BOOLEAN
+        -- Has `parse' been called?
+
+    is_successful: BOOLEAN
+        -- Did parsing succeed without errors?
+
+    help_requested: BOOLEAN
+        -- Was -h or --help specified?
+
+    version_requested: BOOLEAN
+        -- Was -V or --version specified?
+
+    errors: LIST [STRING]
+        -- List of parsing errors.
+
+    has_errors: BOOLEAN
+        -- Are there any errors?
+
+feature -- Help
+
+    help_text, usage, help_message: STRING
+        -- Generate help text.
+
+    version_text: STRING
+        -- Generate version text.
+
+    print_help
+        -- Print help text to stdout.
+
+    print_version
+        -- Print version text to stdout.
+
+    print_errors
+        -- Print errors to stdout.
+
+================================================================================
