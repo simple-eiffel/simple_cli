@@ -1,0 +1,692 @@
+note
+	description: "Simple CLI argument parsing library"
+	author: "Larry Rix"
+	date: "$Date$"
+	revision: "$Revision$"
+
+class interface
+	SIMPLE_CLI
+
+create 
+	make
+			-- Initialize CLI parser.
+
+feature -- Access
+
+	argument (i: INTEGER_32): IMMUTABLE_STRING_32
+			-- `i`-th argument of command that started system execution
+			-- (the command name if `i` = 0).
+			-- (from ARGUMENTS_32)
+		require -- from ARGUMENTS_32
+			index_large_enough: i >= 0
+			index_small_enough: i <= argument_count
+		ensure -- from ARGUMENTS_32
+			instance_free: class
+			argument_not_void: Result /= Void
+
+	argument_array: ARRAY [IMMUTABLE_STRING_32]
+			-- Array containing command name (position 0) and arguments.
+			-- A new instance at each query.
+			-- (from ARGUMENTS_32)
+		ensure -- from ARGUMENTS_32
+			instance_free: class
+			argument_array_not_void: Result /= Void
+			argument_array_compare_objects: Result.object_comparison
+
+	Command_line: IMMUTABLE_STRING_32
+			-- Full command line: `command_name` followed by arguments.
+			-- (from ARGUMENTS_32)
+		ensure -- from ARGUMENTS_32
+			instance_free: class
+			Result.count >= Command_name.count
+
+	Command_name: IMMUTABLE_STRING_32
+			-- Name of command that started system execution.
+			-- (from ARGUMENTS_32)
+		ensure -- from ARGUMENTS_32
+			instance_free: class
+			definition: Result.same_string (argument (0))
+
+	generating_type: TYPE [detachable SIMPLE_CLI]
+			-- Type of current object
+			-- (type of which it is a direct instance)
+			-- (from ANY)
+		ensure -- from ANY
+			generating_type_not_void: Result /= Void
+
+	generator: STRING_8
+			-- Name of current object's generating class
+			-- (base class of the type of which it is a direct instance)
+			-- (from ANY)
+		ensure -- from ANY
+			generator_not_void: Result /= Void
+			generator_not_empty: not Result.is_empty
+	
+feature -- Measurement
+
+	argument_count: INTEGER_32
+			-- Number of arguments given to command that started
+			-- system execution (command name does not count).
+			-- (from ARGUMENTS_32)
+		ensure -- from ARGUMENTS_32
+			instance_free: class
+			argument_count_positive: Result >= 0
+	
+feature -- Comparison
+
+	frozen deep_equal (a: detachable ANY; b: like arg #1): BOOLEAN
+			-- Are `a` and `b` either both void
+			-- or attached to isomorphic object structures?
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+			shallow_implies_deep: standard_equal (a, b) implies Result
+			both_or_none_void: (a = Void) implies (Result = (b = Void))
+			same_type: (Result and (a /= Void)) implies (b /= Void and then a.same_type (b))
+			symmetric: Result implies deep_equal (b, a)
+
+	frozen equal (a: detachable ANY; b: like arg #1): BOOLEAN
+			-- Are `a` and `b` either both void or attached
+			-- to objects considered equal?
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+			definition: Result = (a = Void and b = Void) or else ((a /= Void and b /= Void) and then a.is_equal (b))
+
+	frozen is_deep_equal alias "≡≡≡" (other: SIMPLE_CLI): BOOLEAN
+			-- Are `Current` and `other` attached to isomorphic object structures?
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+		ensure -- from ANY
+			shallow_implies_deep: standard_is_equal (other) implies Result
+			same_type: Result implies same_type (other)
+			symmetric: Result implies other.is_deep_equal (Current)
+
+	is_equal (other: SIMPLE_CLI): BOOLEAN
+			-- Is `other` attached to an object considered
+			-- equal to current object?
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+		ensure -- from ANY
+			symmetric: Result implies other ~ Current
+			consistent: standard_is_equal (other) implies Result
+
+	frozen standard_equal (a: detachable ANY; b: like arg #1): BOOLEAN
+			-- Are `a` and `b` either both void or attached to
+			-- field-by-field identical objects of the same type?
+			-- Always uses default object comparison criterion.
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+			definition: Result = (a = Void and b = Void) or else ((a /= Void and b /= Void) and then a.standard_is_equal (b))
+
+	frozen standard_is_equal alias "≜" (other: SIMPLE_CLI): BOOLEAN
+			-- Is `other` attached to an object of the same type
+			-- as current object, and field-by-field identical to it?
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+		ensure -- from ANY
+			same_type: Result implies same_type (other)
+			symmetric: Result implies other.standard_is_equal (Current)
+	
+feature -- Status report
+
+	coalesced_character_option_value (o: CHARACTER_32): detachable IMMUTABLE_STRING_32
+			-- The value, if any, specified for character option `o` on
+			-- the command line.
+			-- Defined as follows (where 'X' is the current 'option_sign' and
+			-- 'xx' is an arbitrary, possibly empty sequence of characters):
+			--   `val` if command line includes an argument of the form `Xxxoval`
+			--	   (this may be an empty string if argument is just `Xxxo`).
+			--   Void otherwise.
+			-- (from ARGUMENTS_32)
+		require -- from ARGUMENTS_32
+			o_non_null: o /= '%U'.to_character_32
+		ensure -- from ARGUMENTS_32
+			instance_free: class
+
+	coalesced_word_option_value (opt: READABLE_STRING_GENERAL): detachable IMMUTABLE_STRING_32
+			-- The value, if any, specified for word option `opt` on the
+			-- command line.
+			-- Defined as follows (where X is the current `option_sign`):
+			--   `val` if command line includes an argument of the form `Xoptval`
+			--	   (this may be an empty string if argument is just `Xopt`).
+			--   Void otherwise.
+			-- (from ARGUMENTS_32)
+		require -- from ARGUMENTS_32
+			opt_non_void: opt /= Void
+			opt_meaningful: not opt.is_empty
+		ensure -- from ARGUMENTS_32
+			instance_free: class
+
+	conforms_to (other: ANY): BOOLEAN
+			-- Does type of current object conform to type
+			-- of `other` (as per Eiffel: The Language, chapter 13)?
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+
+	index_of_beginning_with_word_option (opt: READABLE_STRING_GENERAL): INTEGER_32
+			-- Does command line specify argument beginning with word
+			-- option `opt` and, if so, at what position?
+			-- If one of the arguments in list of space-separated arguments
+			-- is `Xoptxx`, where `X` is the current `option_sign`, 'xx'
+			-- is arbitrary, possibly empty sequence of characters,
+			-- then index of this argument in list;
+			-- else 0.
+			-- (from ARGUMENTS_32)
+		require -- from ARGUMENTS_32
+			opt_non_void: opt /= Void
+			opt_meaningful: not opt.is_empty
+		ensure -- from ARGUMENTS_32
+			instance_free: class
+
+	index_of_character_option (o: CHARACTER_32): INTEGER_32
+			-- Does command line specify character option `o` and, if so,
+			-- at what position?
+			-- If one of the space-separated arguments is of the form `Xxxoyy`,
+			-- where `X` is the current `option_sign`, `xx` and `yy`
+			-- are arbitrary, possibly empty sequences of characters,
+			-- then index of this argument in list of arguments;
+			-- else 0.
+			-- (from ARGUMENTS_32)
+		require -- from ARGUMENTS_32
+			o_non_null: o /= '%U'.to_character_32
+		ensure -- from ARGUMENTS_32
+			instance_free: class
+
+	index_of_word_option (opt: READABLE_STRING_GENERAL): INTEGER_32
+			-- Does command line specify word option `opt` and, if so,
+			-- at what position?
+			-- If one of the arguments in list of space-separated arguments
+			-- is `Xopt`, where `X` is the current `option_sign`,
+			-- then index of this argument in list;
+			-- else 0.
+			-- (from ARGUMENTS_32)
+		require -- from ARGUMENTS_32
+			opt_non_void: opt /= Void
+			opt_meaningful: not opt.is_empty
+		ensure -- from ARGUMENTS_32
+			instance_free: class
+
+	Option_sign: CELL [CHARACTER_32]
+			-- The character used to signal options on the command line.
+			-- This can be '%U' if no sign is necessary for the argument
+			-- to be an option
+			-- Default is '-'
+			-- (from ARGUMENTS_32)
+		ensure -- from ARGUMENTS_32
+			instance_free: class
+
+	same_type (other: ANY): BOOLEAN
+			-- Is type of current object identical to type of `other`?
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+		ensure -- from ANY
+			definition: Result = (conforms_to (other) and other.conforms_to (Current))
+
+	separate_character_option_value (o: CHARACTER_32): detachable IMMUTABLE_STRING_32
+			-- The value, if any, specified after character option `o` on
+			-- the command line.
+			-- This is one of the following (where `X` is the current
+			-- `option_sign`, `xx` and 'yy' are arbitrary, possibly empty
+			-- sequences of characters):
+			--   `val` if command line includes two consecutive arguments
+			--	   of the form `Xxxoyy` and `val` respectively.
+			--   Empty string if command line includes argument `Xxxoyy`, which is
+			--	   either last argument or followed by argument starting with `X`.
+			--   Void if there is no argument of the form `Xxxoyy`.
+			-- (from ARGUMENTS_32)
+		require -- from ARGUMENTS_32
+			o_non_null: o /= '%U'.to_character_32
+		ensure -- from ARGUMENTS_32
+			instance_free: class
+
+	separate_word_option_value (opt: READABLE_STRING_GENERAL): detachable IMMUTABLE_STRING_32
+			-- The value, if any, specified after word option `opt` on the
+			-- command line.
+			-- This is one of the following (where `X` is the current `option_sign`):
+			--   `val` if command line includes two consecutive arguments
+			--	   of the form `Xopt` and `val` respectively.
+			--   Empty string if command line includes argument `Xopt`, which is
+			--	   either last argument or followed by argument starting with `X`.
+			--   Void if no `Xopt` argument.
+			-- (from ARGUMENTS_32)
+		require -- from ARGUMENTS_32
+			opt_non_void: opt /= Void
+			opt_meaningful: not opt.is_empty
+		ensure -- from ARGUMENTS_32
+			instance_free: class
+	
+feature -- Status setting
+
+	set_option_sign (c: CHARACTER_32)
+			-- Make `c` the option sign.
+			-- Use'%U' if no sign is necessary for the argument to
+			-- be an option.
+			-- (from ARGUMENTS_32)
+		ensure -- from ARGUMENTS_32
+			instance_free: class
+	
+feature -- Duplication
+
+	copy (other: SIMPLE_CLI)
+			-- Update current object using fields of object attached
+			-- to `other`, so as to yield equal objects.
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+			type_identity: same_type (other)
+		ensure -- from ANY
+			is_equal: Current ~ other
+
+	frozen deep_copy (other: SIMPLE_CLI)
+			-- Effect equivalent to that of:
+			--		`copy` (`other` . `deep_twin`)
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+		ensure -- from ANY
+			deep_equal: deep_equal (Current, other)
+
+	frozen deep_twin: SIMPLE_CLI
+			-- New object structure recursively duplicated from Current.
+			-- (from ANY)
+		ensure -- from ANY
+			deep_twin_not_void: Result /= Void
+			deep_equal: deep_equal (Current, Result)
+
+	frozen standard_copy (other: SIMPLE_CLI)
+			-- Copy every field of `other` onto corresponding field
+			-- of current object.
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+			type_identity: same_type (other)
+		ensure -- from ANY
+			is_standard_equal: standard_is_equal (other)
+
+	frozen standard_twin: SIMPLE_CLI
+			-- New object field-by-field identical to `other`.
+			-- Always uses default copying semantics.
+			-- (from ANY)
+		ensure -- from ANY
+			standard_twin_not_void: Result /= Void
+			equal: standard_equal (Result, Current)
+
+	frozen twin: SIMPLE_CLI
+			-- New object equal to `Current`
+			-- `twin` calls `copy`; to change copying/twinning semantics, redefine `copy`.
+			-- (from ANY)
+		ensure -- from ANY
+			twin_not_void: Result /= Void
+			is_equal: Result ~ Current
+	
+feature -- Basic operations
+
+	frozen default: detachable SIMPLE_CLI
+			-- Default value of object's type
+			-- (from ANY)
+
+	frozen default_pointer: POINTER
+			-- Default value of type `POINTER`
+			-- (Avoid the need to write `p`.`default` for
+			-- some `p` of type `POINTER`.)
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+
+	default_rescue
+			-- Process exception for routines with no Rescue clause.
+			-- (Default: do nothing.)
+			-- (from ANY)
+
+	frozen do_nothing
+			-- Execute a null action.
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+	
+feature -- Access: Arguments
+
+	args: LIST [STRING_8]
+			-- All positional arguments.
+			-- Was declared in {SIMPLE_CLI} as synonym of `arguments` and `positional_args`.
+		require
+			parsed: has_parsed
+
+	arguments: LIST [STRING_8]
+			-- All positional arguments.
+			-- Was declared in {SIMPLE_CLI} as synonym of `args` and `positional_args`.
+		require
+			parsed: has_parsed
+
+	arguments_after_command: LIST [STRING_8]
+			-- Arguments after the command.
+		require
+			parsed: has_parsed
+
+	command: detachable STRING_8
+			-- First positional argument (the command).
+			-- Was declared in {SIMPLE_CLI} as synonym of `subcommand` and `first_arg`.
+		require
+			parsed: has_parsed
+
+	first_arg: detachable STRING_8
+			-- First positional argument (the command).
+			-- Was declared in {SIMPLE_CLI} as synonym of `command` and `subcommand`.
+		require
+			parsed: has_parsed
+
+	positional_args: LIST [STRING_8]
+			-- All positional arguments.
+			-- Was declared in {SIMPLE_CLI} as synonym of `arguments` and `args`.
+		require
+			parsed: has_parsed
+
+	subcommand: detachable STRING_8
+			-- First positional argument (the command).
+			-- Was declared in {SIMPLE_CLI} as synonym of `command` and `first_arg`.
+		require
+			parsed: has_parsed
+	
+feature -- Access: Boolean Options
+
+	boolean_option (a_name: STRING_8): BOOLEAN
+			-- Get boolean value for option `a_name`.
+			-- Recognizes: "true", "false", "yes", "no", "1", "0"
+		require
+			parsed: has_parsed
+	
+feature -- Access: Cursor
+
+	new_cursor: ITERATION_CURSOR [IMMUTABLE_STRING_32]
+			-- Fresh cursor associated with current structure
+			-- (from ARGUMENTS_32)
+		require -- from  ITERABLE
+			True
+		ensure -- from ITERABLE
+			result_attached: Result /= Void
+		ensure then -- from ARGUMENTS_32
+			instance_free: class
+	
+feature -- Access: Flags
+
+	flag_exists (a_name: STRING_8): BOOLEAN
+			-- Is the flag `a_name` set?
+			-- Was declared in {SIMPLE_CLI} as synonym of `has_flag`, `flag_set` and `is_flag`.
+		require
+			parsed: has_parsed
+
+	flag_set (a_name: STRING_8): BOOLEAN
+			-- Is the flag `a_name` set?
+			-- Was declared in {SIMPLE_CLI} as synonym of `has_flag`, `is_flag` and `flag_exists`.
+		require
+			parsed: has_parsed
+
+	has_flag (a_name: STRING_8): BOOLEAN
+			-- Is the flag `a_name` set?
+			-- Was declared in {SIMPLE_CLI} as synonym of `flag_set`, `is_flag` and `flag_exists`.
+		require
+			parsed: has_parsed
+
+	is_flag (a_name: STRING_8): BOOLEAN
+			-- Is the flag `a_name` set?
+			-- Was declared in {SIMPLE_CLI} as synonym of `has_flag`, `flag_set` and `flag_exists`.
+		require
+			parsed: has_parsed
+	
+feature -- Access: Integer Options
+
+	integer_option (a_name: STRING_8): INTEGER_32
+			-- Get integer value for option `a_name` (0 if not found or not integer).
+		require
+			parsed: has_parsed
+
+	integer_option_or_default (a_name: STRING_8; a_default: INTEGER_32): INTEGER_32
+			-- Get integer value for option `a_name`, or `a_default`.
+		require
+			parsed: has_parsed
+	
+feature -- Access: String Options
+
+	get_option (a_name: STRING_8): detachable STRING_8
+			-- Get value for option `a_name` (or default if set).
+			-- Was declared in {SIMPLE_CLI} as synonym of `option_value` and `value_of`.
+		require
+			parsed: has_parsed
+
+	has_option (a_name: STRING_8): BOOLEAN
+			-- Is the option `a_name` set (or has default)?
+			-- Was declared in {SIMPLE_CLI} as synonym of `option_set` and `option_exists`.
+		require
+			parsed: has_parsed
+
+	option_exists (a_name: STRING_8): BOOLEAN
+			-- Is the option `a_name` set (or has default)?
+			-- Was declared in {SIMPLE_CLI} as synonym of `has_option` and `option_set`.
+		require
+			parsed: has_parsed
+
+	option_set (a_name: STRING_8): BOOLEAN
+			-- Is the option `a_name` set (or has default)?
+			-- Was declared in {SIMPLE_CLI} as synonym of `has_option` and `option_exists`.
+		require
+			parsed: has_parsed
+
+	option_value (a_name: STRING_8): detachable STRING_8
+			-- Get value for option `a_name` (or default if set).
+			-- Was declared in {SIMPLE_CLI} as synonym of `get_option` and `value_of`.
+		require
+			parsed: has_parsed
+
+	option_value_or_default (a_name, a_default: STRING_8): STRING_8
+			-- Get value for option `a_name`, or `a_default` if not found.
+		require
+			parsed: has_parsed
+
+	value_of (a_name: STRING_8): detachable STRING_8
+			-- Get value for option `a_name` (or default if set).
+			-- Was declared in {SIMPLE_CLI} as synonym of `option_value` and `get_option`.
+		require
+			parsed: has_parsed
+	
+feature -- Configuration
+
+	add_flag (a_names, a_description: STRING_8)
+			-- Add a boolean flag.
+			-- `a_names` can be "v|verbose" for short and long forms.
+			-- Was declared in {SIMPLE_CLI} as synonym of `define_flag` and `flag`.
+		require
+			names_not_empty: not a_names.is_empty
+
+	add_option (a_names, a_description, a_arg_name: STRING_8)
+			-- Add an option with a value.
+			-- `a_names` can be "o|output" for short and long forms.
+			-- Was declared in {SIMPLE_CLI} as synonym of `define_option` and `option_def`.
+		require
+			names_not_empty: not a_names.is_empty
+
+	add_option_with_default (a_names, a_description, a_arg_name, a_default: STRING_8)
+			-- Add an option with a default value.
+		require
+			names_not_empty: not a_names.is_empty
+
+	add_required_option (a_names, a_description, a_arg_name: STRING_8)
+			-- Add a required option (must be provided).
+		require
+			names_not_empty: not a_names.is_empty
+
+	define_flag (a_names, a_description: STRING_8)
+			-- Add a boolean flag.
+			-- `a_names` can be "v|verbose" for short and long forms.
+			-- Was declared in {SIMPLE_CLI} as synonym of `add_flag` and `flag`.
+		require
+			names_not_empty: not a_names.is_empty
+
+	define_option (a_names, a_description, a_arg_name: STRING_8)
+			-- Add an option with a value.
+			-- `a_names` can be "o|output" for short and long forms.
+			-- Was declared in {SIMPLE_CLI} as synonym of `add_option` and `option_def`.
+		require
+			names_not_empty: not a_names.is_empty
+
+	disable_help_flag
+			-- Disable built-in -h/--help handling.
+
+	disable_version_flag
+			-- Disable built-in -V/--version handling.
+
+	flag (a_names, a_description: STRING_8)
+			-- Add a boolean flag.
+			-- `a_names` can be "v|verbose" for short and long forms.
+			-- Was declared in {SIMPLE_CLI} as synonym of `add_flag` and `define_flag`.
+		require
+			names_not_empty: not a_names.is_empty
+
+	option_def (a_names, a_description, a_arg_name: STRING_8)
+			-- Add an option with a value.
+			-- `a_names` can be "o|output" for short and long forms.
+			-- Was declared in {SIMPLE_CLI} as synonym of `add_option` and `define_option`.
+		require
+			names_not_empty: not a_names.is_empty
+
+	set_app_info (a_name, a_description, a_version: STRING_8)
+			-- Set application info for help output.
+		require
+			name_not_empty: not a_name.is_empty
+		ensure
+			name_set: app_name = a_name
+			description_set: app_description = a_description
+			version_set: app_version = a_version
+	
+feature -- Help
+
+	help_message: STRING_8
+			-- Generate help text.
+			-- Was declared in {SIMPLE_CLI} as synonym of `help_text` and `usage`.
+
+	help_text: STRING_8
+			-- Generate help text.
+			-- Was declared in {SIMPLE_CLI} as synonym of `usage` and `help_message`.
+
+	print_errors
+			-- Print errors to stdout.
+
+	print_help
+			-- Print help text to stdout.
+
+	print_version
+			-- Print version text to stdout.
+
+	usage: STRING_8
+			-- Generate help text.
+			-- Was declared in {SIMPLE_CLI} as synonym of `help_text` and `help_message`.
+
+	version_text: STRING_8
+			-- Generate version text.
+	
+feature -- Output
+
+	Io: STD_FILES
+			-- Handle to standard file setup
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+			io_not_void: Result /= Void
+
+	out: STRING_8
+			-- New string containing terse printable representation
+			-- of current object
+			-- (from ANY)
+		ensure -- from ANY
+			out_not_void: Result /= Void
+
+	print (o: detachable ANY)
+			-- Write terse external representation of `o`
+			-- on standard output.
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+
+	frozen tagged_out: STRING_8
+			-- New string containing terse printable representation
+			-- of current object
+			-- (from ANY)
+		ensure -- from ANY
+			tagged_out_not_void: Result /= Void
+	
+feature -- Parsing
+
+	parse
+			-- Parse command-line arguments.
+			-- Sets `help_requested` or `version_requested` if those flags are used.
+			-- Was declared in {SIMPLE_CLI} as synonym of `run`, `process_args` and `process_arguments`.
+		ensure
+			parsed: has_parsed
+
+	process_args
+			-- Parse command-line arguments.
+			-- Sets `help_requested` or `version_requested` if those flags are used.
+			-- Was declared in {SIMPLE_CLI} as synonym of `parse`, `run` and `process_arguments`.
+		ensure
+			parsed: has_parsed
+
+	process_arguments
+			-- Parse command-line arguments.
+			-- Sets `help_requested` or `version_requested` if those flags are used.
+			-- Was declared in {SIMPLE_CLI} as synonym of `parse`, `run` and `process_args`.
+		ensure
+			parsed: has_parsed
+
+	run
+			-- Parse command-line arguments.
+			-- Sets `help_requested` or `version_requested` if those flags are used.
+			-- Was declared in {SIMPLE_CLI} as synonym of `parse`, `process_args` and `process_arguments`.
+		ensure
+			parsed: has_parsed
+	
+feature -- Platform
+
+	Operating_environment: OPERATING_ENVIRONMENT
+			-- Objects available from the operating system
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+			operating_environment_not_void: Result /= Void
+	
+feature -- Status
+
+	errors: LIST [STRING_8]
+			-- List of parsing errors.
+
+	has_errors: BOOLEAN
+			-- Are there any errors?
+
+	has_parsed: BOOLEAN
+			-- Has `parse` been called?
+
+	help_requested: BOOLEAN
+			-- Was -h or --help specified?
+
+	is_successful: BOOLEAN
+			-- Did parsing succeed without errors?
+
+	version_requested: BOOLEAN
+			-- Was -V or --version specified?
+	
+invariant
+		-- from ANY
+	reflexive_equality: standard_is_equal (Current)
+	reflexive_conformance: conforms_to (Current)
+
+note
+	copyright: "Copyright (c) 2024-2025, Larry Rix"
+	license: "MIT License"
+
+end -- class SIMPLE_CLI
+
