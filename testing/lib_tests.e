@@ -12,34 +12,40 @@ inherit
 feature -- Tests
 
 	test_basic_flag
-			-- Test basic flag parsing.
+			-- A flag appears in the help with its description.
 		local
 			cli: SIMPLE_CLI
 		do
 			create cli.make
 			cli.add_flag ("verbose", "Enable verbose output")
-			assert_true ("flag added", True)
+			assert_string_contains ("name", cli.help_text, "verbose")
+			assert_string_contains ("description", cli.help_text, "Enable verbose output")
 		end
 
 	test_basic_option
-			-- Test basic option parsing.
+			-- An option appears in the help with its argument.
 		local
 			cli: SIMPLE_CLI
 		do
 			create cli.make
 			cli.add_option ("output", "Output file", "FILE")
-			assert_true ("option added", True)
+			assert_string_contains ("name", cli.help_text, "output")
+			assert_string_contains ("description", cli.help_text, "Output file")
+			assert_string_contains ("argument", cli.help_text, "FILE")
 		end
 
 	test_short_and_long_names
-			-- Test short and long name format.
+			-- Both forms of a name appear in the help.
 		local
 			cli: SIMPLE_CLI
 		do
 			create cli.make
 			cli.add_flag ("v|verbose", "Enable verbose output")
 			cli.add_option ("o|output", "Output file", "FILE")
-			assert_true ("short and long names work", True)
+			assert_string_contains ("short flag", cli.help_text, "-v")
+			assert_string_contains ("long flag", cli.help_text, "--verbose")
+			assert_string_contains ("short option", cli.help_text, "-o")
+			assert_string_contains ("long option", cli.help_text, "--output")
 		end
 
 	test_positional_arguments
